@@ -1,0 +1,3731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>VoIP desde Cero hasta un Nivel Profesional by Rubén Sbarsky — V001</title>
+  <style>
+    :root {
+      --bg-main: #0a0e1a;
+      --bg-card: #0f172a;
+      --bg-elevated: #16223d;
+      --blue-featured: #1e3a5f;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --accent: #38bdf8;
+      --accent-bright: #00d4ff;
+      --accent-soft: rgba(56, 189, 248, 0.14);
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --purple: #a855f7;
+      --border-color: #1e3a5f;
+      --font-scale: 1;
+      --header-h: 60px;
+      --shadow-lg: 0 12px 30px rgba(0, 0, 0, 0.45);
+    }
+
+    body.light-theme {
+      --bg-main: #f1f5f9;
+      --bg-card: #ffffff;
+      --bg-elevated: #e2e8f0;
+      --blue-featured: #cbd5e1;
+      --text-primary: #0f172a;
+      --text-secondary: #334155;
+      --accent: #0284c7;
+      --accent-bright: #0369a1;
+      --accent-soft: rgba(2, 132, 199, 0.12);
+      --border-color: #94a3b8;
+      --shadow-lg: 0 10px 24px rgba(15, 23, 42, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      font-size: calc(16px * var(--font-scale));
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.65;
+      overflow-x: hidden;
+      min-height: 100vh;
+      padding-top: calc(var(--header-h) + 52px);
+      padding-bottom: 90px;
+    }
+
+    /* Barra de progreso superior */
+    #reading-progress-wrap {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(30, 58, 95, 0.4);
+      z-index: 60;
+    }
+
+    #reading-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), var(--purple), var(--success));
+      transition: width 0.15s ease-out;
+    }
+
+    /* Barra de Navegación Superior Fija */
+    #top-nav {
+      position: fixed;
+      top: 4px;
+      left: 0;
+      right: 0;
+      height: var(--header-h);
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 10px;
+      z-index: 50;
+      overflow-x: auto;
+      scrollbar-width: thin;
+    }
+
+    body.light-theme #top-nav {
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    #top-nav::-webkit-scrollbar {
+      height: 4px;
+    }
+
+    #top-nav::-webkit-scrollbar-thumb {
+      background: var(--blue-featured);
+      border-radius: 4px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 42px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-primary);
+      font-size: 0.86rem;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.1s;
+      flex-shrink: 0;
+    }
+
+    .chip:hover, .chip:focus-visible {
+      border-color: var(--accent);
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .chip.active {
+      background: var(--accent-soft);
+      border-color: var(--accent-bright);
+      color: var(--accent-bright);
+      box-shadow: 0 0 12px rgba(0, 212, 255, 0.22);
+    }
+
+    #mb {
+      background: linear-gradient(135deg, #1e3a5f, #0f172a);
+      color: #ffffff;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Sub-barra de herramientas utilitarias */
+    #utility-bar {
+      position: fixed;
+      top: calc(var(--header-h) + 4px);
+      left: 0;
+      right: 0;
+      min-height: 46px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      padding: 4px 10px;
+      z-index: 40;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      flex: 1 1 170px;
+      min-width: 140px;
+      background: var(--bg-main);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 2px 8px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      padding: 6px 4px;
+      outline: none;
+    }
+
+    .tool-buttons {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tool-btn {
+      min-height: 36px;
+      min-width: 36px;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .tool-btn:hover, .tool-btn:focus-visible {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Panel Lateral Índice (#dr) según especificación */
+    #dr {
+      position: fixed;
+      top: 64px;
+      left: 0;
+      bottom: 0;
+      width: min(330px, 88vw);
+      background: #0f172a;
+      border-right: 1px solid #1e3a5f;
+      transform: translateX(-105%);
+      transition: .25s;
+      z-index: 55;
+      overflow: auto;
+      padding: 12px 10px 80px 10px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    #dr.o {
+      transform: none;
+    }
+
+    #dr a {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border-radius: 8px;
+      color: #e2e8f0;
+      text-decoration: none;
+      cursor: pointer;
+      min-height: 44px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+      border: 1px solid transparent;
+    }
+
+    #dr a:hover, #dr a:focus-visible {
+      background: #ffffff0d;
+      border-color: #38bdf866;
+      outline: none;
+    }
+
+    #dr a.on {
+      background: #00d4ff22;
+      color: #00d4ff;
+      font-weight: 700;
+      border-color: #00d4ff55;
+    }
+
+    /* Contenedor Principal Optimizado para Galaxy A02s (360px+) */
+    main {
+      max-width: 980px;
+      margin: 14px auto;
+      padding: 0 12px;
+    }
+
+    .tab-section {
+      display: none;
+      animation: fadeIn 0.22s ease-out;
+    }
+
+    .tab-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Tipografía y Tarjetas */
+    h1 {
+      font-size: clamp(1.45rem, 4.8vw, 2.25rem);
+      line-height: 1.25;
+      color: var(--accent-bright);
+      margin-bottom: 12px;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: clamp(1.25rem, 4vw, 1.75rem);
+      color: var(--accent);
+      margin: 18px 0 12px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    h3 {
+      font-size: clamp(1.08rem, 3.4vw, 1.35rem);
+      color: var(--text-primary);
+      margin: 16px 0 8px;
+    }
+
+    h4 {
+      font-size: 1rem;
+      color: var(--accent);
+      margin: 12px 0 6px;
+    }
+
+    p {
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+
+    ul, ol {
+      margin: 8px 0 14px 20px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      color: var(--accent);
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      background: var(--bg-elevated);
+      padding: 12px 14px;
+      border-radius: 0 10px 10px 0;
+      margin: 14px 0;
+    }
+
+    .callout.warn {
+      border-left-color: var(--warning);
+    }
+
+    .callout.danger {
+      border-left-color: var(--danger);
+    }
+
+    .callout.success {
+      border-left-color: var(--success);
+    }
+
+    /* Contenedor SVG 4:5 Vertical */
+    .svg-hero-box {
+      width: 100%;
+      max-width: 440px;
+      aspect-ratio: 4 / 5;
+      margin: 0 auto 18px;
+      background: radial-gradient(circle at 50% 35%, #162a4a 0%, #090d18 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 14px 34px rgba(0, 212, 255, 0.16);
+    }
+
+    .svg-hero-box svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .svg-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    /* Animaciones CSS para el SVG Hero */
+    @keyframes pulseCore {
+      0%, 100% { transform: scale(1); opacity: 0.92; }
+      50% { transform: scale(1.06); opacity: 1; }
+    }
+    @keyframes orbitSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    @keyframes orbitReverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+    @keyframes packetFlow {
+      from { stroke-dashoffset: 240; }
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes waveBeat {
+      0%, 100% { transform: scaleY(0.45); }
+      50% { transform: scaleY(1.18); }
+    }
+    @keyframes floatBadge {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .anim-pulse {
+      transform-origin: 200px 235px;
+      animation: pulseCore 3.4s ease-in-out infinite;
+    }
+    .anim-orbit-cw {
+      transform-origin: 200px 235px;
+      animation: orbitSlow 22s linear infinite;
+    }
+    .anim-orbit-ccw {
+      transform-origin: 200px 235px;
+      animation: orbitReverse 16s linear infinite;
+    }
+    .anim-packet {
+      stroke-dasharray: 10 14;
+      animation: packetFlow 3.2s linear infinite;
+    }
+    .anim-packet-fast {
+      stroke-dasharray: 6 12;
+      animation: packetFlow 1.9s linear infinite;
+    }
+    .anim-wave {
+      transform-origin: 200px 395px;
+      animation: waveBeat 1.4s ease-in-out infinite;
+    }
+    .anim-float {
+      animation: floatBadge 4s ease-in-out infinite;
+    }
+
+    .svg-paused * {
+      animation-play-state: paused !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .anim-pulse, .anim-orbit-cw, .anim-orbit-ccw, .anim-packet, .anim-packet-fast, .anim-wave, .anim-float {
+        animation: none !important;
+      }
+    }
+
+    /* Bloques de Código, Diagramas y Prompts con botón COPIAR */
+    .code-wrap {
+      position: relative;
+      margin: 12px 0 16px;
+      background: #060913;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 12px;
+      background: rgba(30, 58, 95, 0.35);
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      gap: 8px;
+    }
+
+    .copy-btn {
+      min-height: 34px;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--accent);
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--accent-bright);
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background: var(--accent);
+      color: #0a0e1a;
+    }
+
+    pre {
+      padding: 12px;
+      overflow-x: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.84rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      background: rgba(56, 189, 248, 0.12);
+      color: var(--accent-bright);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-size: 0.88em;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    /* Tablas Responsivas */
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      margin: 12px 0 16px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 280px;
+      font-size: 0.88rem;
+    }
+
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border-color);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--bg-elevated);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Desplegables / Acordeones */
+    details.qa-item {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 10px;
+      padding: 10px 14px;
+    }
+
+    details.qa-item summary {
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text-primary);
+      min-height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      list-style: none;
+    }
+
+    details.qa-item summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.qa-item summary::after {
+      content: "＋";
+      color: var(--accent);
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+
+    details.qa-item[open] summary::after {
+      content: "－";
+    }
+
+    details.qa-item .qa-body {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(148, 163, 184, 0.2);
+      color: var(--text-primary);
+    }
+
+    /* Checklists y Autoevaluación */
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--bg-elevated);
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+
+    .check-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      accent-color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .eval-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .eval-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+    }
+
+    .eval-select {
+      min-height: 38px;
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border: 1px solid var(--accent);
+      font-weight: 600;
+    }
+
+    /* Enlaces URL con botón obligatorio "Abrir enlace en nueva ventana" */
+    .url-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .url-code {
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+      word-break: break-all;
+      color: var(--accent-bright);
+    }
+
+    .url-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .open-url-btn {
+      min-height: 40px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--accent-bright);
+      background: linear-gradient(135deg, #0284c7, #1e3a5f);
+      color: #ffffff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .open-url-btn:hover {
+      filter: brightness(1.12);
+    }
+
+    /* Botones pie de pestaña (Anterior / Siguiente) */
+    .tab-footer-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      position: sticky;
+      bottom: 10px;
+      z-index: 30;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .nav-step-btn {
+      min-height: 44px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--accent);
+      background: var(--bg-elevated);
+      color: var(--text-primary);
+      font-size: 0.86rem;
+      font-weight: 700;
+      cursor: pointer;
+      flex: 1;
+      text-align: center;
+    }
+
+    .nav-step-btn.next {
+      background: linear-gradient(135deg, #0284c7, #1e3a5f);
+      color: #ffffff;
+    }
+
+    /* Botones Flotantes Arrastrables (INICIO y ARRIBA) */
+    .floating-drag-btn {
+      position: fixed;
+      z-index: 65;
+      min-height: 46px;
+      min-width: 86px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 2px solid var(--accent-bright);
+      background: rgba(15, 23, 42, 0.94);
+      color: #ffffff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+      cursor: grab;
+      touch-action: none;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .floating-drag-btn:active {
+      cursor: grabbing;
+      transform: scale(0.97);
+    }
+
+    #float-home-btn {
+      right: 12px;
+      bottom: 132px;
+    }
+
+    #float-top-btn {
+      right: 12px;
+      bottom: 76px;
+    }
+
+    /* Pestaña CRÉDITOS Destacado Autor */
+    .author-spotlight {
+      font-size: clamp(1.8rem, 6vw, 2.8rem);
+      font-weight: 900;
+      color: var(--accent-bright);
+      text-align: center;
+      margin: 14px 0 4px;
+      letter-spacing: -0.02em;
+      text-shadow: 0 0 18px rgba(0, 212, 255, 0.35);
+    }
+
+    .author-role {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    /* Toast de notificación */
+    #toast-msg {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%) translateY(120%);
+      background: #0284c7;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 700;
+      z-index: 80;
+      transition: transform 0.25s ease;
+      box-shadow: var(--shadow-lg);
+    }
+
+    #toast-msg.visible {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Optimización de Impresión A4 Vertical */
+    @page {
+      size: A4 portrait;
+      margin: 14mm 12mm;
+    }
+
+    @media print {
+      body {
+        background: #ffffff !important;
+        color: #000000 !important;
+        padding: 0 !important;
+        font-size: 11pt !important;
+      }
+      #top-nav, #utility-bar, #dr, #reading-progress-wrap, .floating-drag-btn, .tab-footer-nav, .svg-controls, .copy-btn, .open-url-btn {
+        display: none !important;
+      }
+      .tab-section {
+        display: block !important;
+        margin-bottom: 18px !important;
+        page-break-inside: auto;
+      }
+      .card, .callout, details.qa-item, .url-card, .code-wrap {
+        background: #ffffff !important;
+        color: #000000 !important;
+        border: 1px solid #444444 !important;
+        box-shadow: none !important;
+      }
+      h1, h2, h3, h4, p, li, td, th, pre, code, .author-spotlight {
+        color: #000000 !important;
+        text-shadow: none !important;
+      }
+      .svg-hero-box {
+        max-width: 260px !important;
+        background: #f8fafc !important;
+        border: 1px solid #333333 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Barra de progreso de lectura -->
+  <div id="reading-progress-wrap" aria-hidden="true">
+    <div id="reading-progress-bar"></div>
+  </div>
+
+  <!-- Fuente SVG Única Oculta (se extrae por JS y se elimina del DOM para evitar animaciones ocultas) -->
+  <div id="svg-master-template" style="display:none;" aria-hidden="true">
+    <svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración animada de arquitectura VoIP: señalización SIP, transporte de audio RTP, centralita Asterisk PBX, pasarela WebRTC y agentes de voz con IA">
+      <defs>
+        <linearGradient id="bgGrad__UID__" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#070b16"/>
+          <stop offset="50%" stop-color="#0f1e38"/>
+          <stop offset="100%" stop-color="#081021"/>
+        </linearGradient>
+        <linearGradient id="coreGrad__UID__" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00d4ff"/>
+          <stop offset="50%" stop-color="#0284c7"/>
+          <stop offset="100%" stop-color="#1e3a5f"/>
+        </linearGradient>
+        <linearGradient id="rtpGrad__UID__" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#22c55e"/>
+          <stop offset="50%" stop-color="#38bdf8"/>
+          <stop offset="100%" stop-color="#a855f7"/>
+        </linearGradient>
+        <radialGradient id="glowCenter__UID__" cx="50%" cy="47%" r="45%">
+          <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.38"/>
+          <stop offset="60%" stop-color="#38bdf8" stop-opacity="0.08"/>
+          <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Fondo 4:5 -->
+      <rect width="400" height="500" fill="url(#bgGrad__UID__)"/>
+      <circle cx="200" cy="235" r="185" fill="url(#glowCenter__UID__)"/>
+
+      <!-- Rejilla de telemetría -->
+      <g stroke="#1e3a5f" stroke-width="0.7" opacity="0.45">
+        <line x1="0" y1="70" x2="400" y2="70"/>
+        <line x1="0" y1="150" x2="400" y2="150"/>
+        <line x1="0" y1="235" x2="400" y2="235"/>
+        <line x1="0" y1="320" x2="400" y2="320"/>
+        <line x1="0" y1="410" x2="400" y2="410"/>
+        <line x1="70" y1="0" x2="70" y2="500"/>
+        <line x1="200" y1="0" x2="200" y2="500"/>
+        <line x1="330" y1="0" x2="330" y2="500"/>
+      </g>
+
+      <!-- Anillos orbitales de protocolos -->
+      <g class="anim-orbit-cw">
+        <circle cx="200" cy="235" r="138" fill="none" stroke="#1e3a5f" stroke-width="1.5" stroke-dasharray="8 6"/>
+        <circle cx="200" cy="97" r="6" fill="#00d4ff"/>
+        <circle cx="338" cy="235" r="5" fill="#22c55e"/>
+        <circle cx="200" cy="373" r="6" fill="#a855f7"/>
+        <circle cx="62" cy="235" r="5" fill="#f59e0b"/>
+      </g>
+
+      <g class="anim-orbit-ccw">
+        <circle cx="200" cy="235" r="102" fill="none" stroke="#38bdf8" stroke-width="1.2" stroke-dasharray="18 10" opacity="0.6"/>
+        <rect x="193" y="127" width="14" height="10" rx="3" fill="#38bdf8"/>
+        <rect x="193" y="333" width="14" height="10" rx="3" fill="#22c55e"/>
+      </g>
+
+      <!-- Rutas de Señalización SIP (Superior) y Flujo de Audio RTP (Inferior) -->
+      <path d="M 66 135 Q 200 55 334 135" fill="none" stroke="#38bdf8" stroke-width="2.5" class="anim-packet"/>
+      <path d="M 66 330 Q 200 285 334 330" fill="none" stroke="url(#rtpGrad__UID__)" stroke-width="3.2" class="anim-packet-fast"/>
+      <path d="M 334 345 Q 200 390 66 345" fill="none" stroke="url(#rtpGrad__UID__)" stroke-width="3.2" class="anim-packet-fast"/>
+
+      <!-- Líneas directas a la PBX central -->
+      <line x1="85" y1="150" x2="155" y2="205" stroke="#00d4ff" stroke-width="2" class="anim-packet"/>
+      <line x1="315" y1="150" x2="245" y2="205" stroke="#a855f7" stroke-width="2" class="anim-packet"/>
+      <line x1="85" y1="325" x2="155" y2="265" stroke="#22c55e" stroke-width="2" class="anim-packet-fast"/>
+      <line x1="315" y1="325" x2="245" y2="265" stroke="#f59e0b" stroke-width="2" class="anim-packet-fast"/>
+
+      <!-- Nodo Central: Centralita Asterisk / PJSIP Core -->
+      <g class="anim-pulse">
+        <polygon points="200,175 252,205 252,265 200,295 148,265 148,205" fill="url(#coreGrad__UID__)" stroke="#ffffff" stroke-width="2"/>
+        <circle cx="200" cy="235" r="32" fill="#091326" stroke="#00d4ff" stroke-width="1.8"/>
+        <!-- Símbolo Asterisk estilizado -->
+        <g stroke="#00d4ff" stroke-width="3.2" stroke-linecap="round">
+          <line x1="200" y1="215" x2="200" y2="255"/>
+          <line x1="183" y1="225" x2="217" y2="245"/>
+          <line x1="217" y1="225" x2="183" y2="245"/>
+        </g>
+        <text x="200" y="280" text-anchor="middle" fill="#ffffff" font-size="9.5" font-weight="bold" font-family="monospace">PBX · PJSIP</text>
+      </g>
+
+      <!-- Nodo Izquierda Superior: Softphone / Android Ext 101 -->
+      <g class="anim-float">
+        <rect x="28" y="102" width="76" height="62" rx="10" fill="#0f172a" stroke="#00d4ff" stroke-width="2"/>
+        <circle cx="66" cy="122" r="9" fill="#00d4ff" opacity="0.25"/>
+        <text x="66" y="126" text-anchor="middle" fill="#00d4ff" font-size="10" font-weight="bold" font-family="monospace">SIP 101</text>
+        <text x="66" y="143" text-anchor="middle" fill="#e2e8f0" font-size="8.5" font-family="sans-serif">Softphone</text>
+        <text x="66" y="155" text-anchor="middle" fill="#22c55e" font-size="7.5" font-family="monospace">REGISTER OK</text>
+      </g>
+
+      <!-- Nodo Derecha Superior: Agente de Voz IA / WebRTC / LiveKit -->
+      <g class="anim-float">
+        <rect x="296" y="102" width="76" height="62" rx="10" fill="#0f172a" stroke="#a855f7" stroke-width="2"/>
+        <text x="334" y="124" text-anchor="middle" fill="#d8b4fe" font-size="10" font-weight="bold" font-family="monospace">IA · MCP</text>
+        <text x="334" y="140" text-anchor="middle" fill="#e2e8f0" font-size="8.5" font-family="sans-serif">WebRTC / Voz</text>
+        <text x="334" y="154" text-anchor="middle" fill="#38bdf8" font-size="7.5" font-family="monospace">STT · LLM · TTS</text>
+      </g>
+
+      <!-- Nodo Izquierda Inferior: Seguridad Firewall / NAT / TLS / SRTP -->
+      <g>
+        <rect x="28" y="302" width="78" height="60" rx="10" fill="#0f172a" stroke="#22c55e" stroke-width="2"/>
+        <text x="67" y="324" text-anchor="middle" fill="#4ade80" font-size="9.5" font-weight="bold" font-family="monospace">TLS · SRTP</text>
+        <text x="67" y="339" text-anchor="middle" fill="#e2e8f0" font-size="8" font-family="sans-serif">NAT / ICE / TURN</text>
+        <text x="67" y="352" text-anchor="middle" fill="#94a3b8" font-size="7.5" font-family="monospace">SBC SHIELD</text>
+      </g>
+
+      <!-- Nodo Derecha Inferior: SIP Trunk / PSTN / DID E.164 -->
+      <g>
+        <rect x="294" y="302" width="78" height="60" rx="10" fill="#0f172a" stroke="#f59e0b" stroke-width="2"/>
+        <text x="333" y="324" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="bold" font-family="monospace">SIP TRUNK</text>
+        <text x="333" y="339" text-anchor="middle" fill="#e2e8f0" font-size="8" font-family="sans-serif">Red PSTN / DID</text>
+        <text x="333" y="352" text-anchor="middle" fill="#38bdf8" font-size="7.5" font-family="monospace">+34 E.164</text>
+      </g>
+
+      <!-- Etiquetas flotantes de mensajes SIP -->
+      <rect x="150" y="64" width="100" height="22" rx="6" fill="#091326" stroke="#38bdf8" stroke-width="1.2"/>
+      <text x="200" y="79" text-anchor="middle" fill="#00d4ff" font-size="9" font-weight="bold" font-family="monospace">INVITE · 200 OK</text>
+
+      <!-- Analizador de Espectro Acústico RTP (Parte inferior) -->
+      <rect x="34" y="388" width="332" height="62" rx="10" fill="#091326" stroke="#1e3a5f" stroke-width="1.4"/>
+      <text x="200" y="403" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="monospace">FLUJO DE AUDIO BIDIRECCIONAL RTP / RTCP · CÓDECS G.711 / OPUS</text>
+      <g class="anim-wave" fill="#00d4ff">
+        <rect x="65" y="412" width="6" height="26" rx="3"/>
+        <rect x="81" y="417" width="6" height="16" rx="3" fill="#22c55e"/>
+        <rect x="97" y="409" width="6" height="32" rx="3"/>
+        <rect x="113" y="415" width="6" height="20" rx="3" fill="#38bdf8"/>
+        <rect x="129" y="407" width="6" height="36" rx="3" fill="#a855f7"/>
+        <rect x="145" y="414" width="6" height="22" rx="3"/>
+        <rect x="161" y="410" width="6" height="30" rx="3" fill="#22c55e"/>
+        <rect x="177" y="418" width="6" height="14" rx="3"/>
+        <rect x="193" y="406" width="6" height="38" rx="3" fill="#00d4ff"/>
+        <rect x="209" y="413" width="6" height="24" rx="3" fill="#a855f7"/>
+        <rect x="225" y="409" width="6" height="32" rx="3"/>
+        <rect x="241" y="416" width="6" height="18" rx="3" fill="#22c55e"/>
+        <rect x="257" y="408" width="6" height="34" rx="3"/>
+        <rect x="273" y="414" width="6" height="22" rx="3" fill="#38bdf8"/>
+        <rect x="289" y="411" width="6" height="28" rx="3" fill="#a855f7"/>
+        <rect x="305" y="417" width="6" height="16" rx="3" fill="#22c55e"/>
+        <rect x="321" y="412" width="6" height="26" rx="3"/>
+      </g>
+
+      <!-- Pie de telemetría -->
+      <text x="200" y="476" text-anchor="middle" fill="#38bdf8" font-size="9.5" font-weight="bold" font-family="monospace">ARQUITECTURA VOIP · SIP · RTP · ASTERISK · WEBRTC · IA</text>
+    </svg>
+  </div>
+
+  <!-- Barra de Navegación Fija con Botón ☰ Índice primero -->
+  <nav id="top-nav" aria-label="Navegación principal del curso VoIP">
+    <button class="chip" id="mb" aria-label="Abrir índice" aria-expanded="false">☰ Índice</button>
+    <button class="chip active" data-tab="0">INICIO</button>
+    <button class="chip" data-tab="1">CONCEPTOS Y REDES</button>
+    <button class="chip" data-tab="2">ASTERISK Y CENTRALITA</button>
+    <button class="chip" data-tab="3">WEBRTC, IA Y ANDROID</button>
+    <button class="chip" data-tab="4">PRÁCTICA Y PROYECTOS</button>
+    <button class="chip" data-tab="5">PROMPTS</button>
+    <button class="chip" data-tab="6">33 Preguntas (Q&amp;A)</button>
+    <button class="chip" data-tab="7">ERRORES Y SEGURIDAD</button>
+    <button class="chip" data-tab="8">RESUMEN Y GLOSARIO</button>
+    <button class="chip" data-tab="9">FUENTES</button>
+    <button class="chip" data-tab="10">CRÉDITOS</button>
+  </nav>
+
+  <!-- Panel Lateral Índice (#dr) -->
+  <div id="dr" aria-label="Índice lateral de secciones"></div>
+
+  <!-- Barra de utilidades: Buscador, Tamaño de letra, Tema, Imprimir -->
+  <div id="utility-bar">
+    <div class="search-box">
+      <span aria-hidden="true">🔍</span>
+      <input type="search" id="global-search" placeholder="Buscar en todo el curso (ej. PJSIP, NAT, TURN, 112)..." aria-label="Buscar término en el curso">
+    </div>
+    <div class="tool-buttons">
+      <button class="tool-btn" id="font-dec-btn" title="Reducir tamaño de letra" aria-label="Reducir tamaño de letra">A−</button>
+      <button class="tool-btn" id="font-inc-btn" title="Aumentar tamaño de letra" aria-label="Aumentar tamaño de letra">A+</button>
+      <button class="tool-btn" id="theme-toggle-btn" title="Alternar tema claro/oscuro" aria-label="Alternar tema claro u oscuro">🌓</button>
+      <button class="tool-btn" id="print-pdf-btn" title="Imprimir o guardar en PDF" aria-label="Imprimir o guardar en PDF">🖨️ PDF</button>
+    </div>
+  </div>
+
+  <!-- Botones Flotantes Arrastrables (INICIO y ARRIBA) -->
+  <button id="float-home-btn" class="floating-drag-btn" title="Arrastrar o pulsar para ir a INICIO" aria-label="Ir a la pestaña INICIO">🏠 INICIO</button>
+  <button id="float-top-btn" class="floating-drag-btn" title="Arrastrar o pulsar para subir al comienzo de la pestaña actual" aria-label="Subir al inicio de la pestaña actual">⬆️ ARRIBA</button>
+
+  <main id="main-container">
+
+    <!-- ==========================================
+         PESTAÑA 0: INICIO
+         ========================================== -->
+    <section class="tab-section active" id="sec-0" data-t="INICIO">
+      <div class="card">
+        <div id="svg-mount-home" class="svg-hero-box" role="region" aria-label="Animación interactiva de arquitectura VoIP en INICIO"></div>
+        <div class="svg-controls">
+          <button class="chip" id="toggle-anim-home" type="button">⏸️ Pausar / Reanudar animación SVG</button>
+          <button class="chip" id="ix" type="button">☰ Ver índice</button>
+        </div>
+
+        <h1>VOIP DESDE CERO HASTA UN NIVEL PROFESIONAL by Rubén Sbarsky</h1>
+        <p><strong>Formación autodidacta, práctica y orientada a proyectos reales</strong></p>
+
+        <div class="badge-row">
+          <span class="badge">Autor: Rubén Sbarsky</span>
+          <span class="badge">Fecha: 15/11/2026</span>
+          <span class="badge">Duración: 8 a 12 semanas (5 a 7 h/semana)</span>
+          <span class="badge">Nivel de entrada: Cero conocimientos de telefonía IP</span>
+        </div>
+
+        <div class="callout">
+          <strong>Objetivo del curso:</strong> Poder comprender, diseñar, montar, configurar, probar, asegurar y diagnosticar soluciones VoIP, y saber cuándo conviene usar SIP, WebRTC, una centralita, un proveedor telefónico o una plataforma de voz para IA.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Cómo utilizar este curso</h2>
+        <p>Este no es un glosario para memorizar siglas. Es un itinerario de aprendizaje haciendo. Cada módulo contiene:</p>
+        <ol>
+          <li>Qué debes comprender.</li>
+          <li>Para qué sirve en una situación real.</li>
+          <li>Una práctica guiada.</li>
+          <li>Una prueba que demuestra que has aprendido.</li>
+          <li>Errores habituales y cómo diagnosticarlos.</li>
+        </ol>
+        <div class="callout warn">
+          <strong>Regla de oro:</strong> no avances porque hayas leído una explicación. Avanza cuando puedas ejecutar la práctica, explicar qué ocurrió y resolver al menos un fallo deliberado.
+        </div>
+
+        <h3>Laboratorio recomendado</h3>
+        <p>Puedes aprender sin comprar una centralita física ni contratar inmediatamente un número telefónico.</p>
+        <ul>
+          <li>Un ordenador con Linux (Ubuntu es una opción cómoda; también puede utilizarse una máquina virtual).</li>
+          <li>Un teléfono Android.</li>
+          <li>Una conexión a Internet.</li>
+          <li>Auriculares con micrófono.</li>
+          <li>Dos aplicaciones de telefonía SIP (softphones) para las primeras prácticas, por ejemplo Linphone o MicroSIP. Comprueba la compatibilidad y descarga siempre desde sus sitios oficiales.</li>
+          <li>Más adelante: Asterisk, una cuenta de proveedor SIP de pruebas y, para el módulo de voz con IA, LiveKit u otra plataforma equivalente.</li>
+        </ul>
+
+        <div class="callout danger">
+          <strong>Importante:</strong> el laboratorio inicial se realiza en una red privada y con cuentas de prueba. No abras puertos SIP/RTP de tu router a Internet para “hacer que funcione”. No publiques credenciales, no uses contraseñas débiles y no hagas llamadas automatizadas a números reales sin autorización.
+        </div>
+
+        <h3>Qué significa llegar a ser competente (Lista de comprobación interactiva)</h3>
+        <p>Marca cada competencia a medida que la domines durante el curso (tu progreso se guarda automáticamente en tu navegador):</p>
+        <div id="competency-checklist">
+          <label class="check-item"><input type="checkbox" data-check="comp-1"> <span>Dibujar el recorrido de una llamada y explicar cada componente.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-2"> <span>Distinguir señalización, transporte de audio y acceso a la red telefónica pública.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-3"> <span>Configurar extensiones SIP y un plan de marcado sencillo.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-4"> <span>Interpretar los mensajes SIP más habituales.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-5"> <span>Entender códecs, latencia, jitter, pérdida de paquetes y NAT.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-6"> <span>Reconocer cuándo hace falta STUN, TURN o un SBC.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-7"> <span>Proteger una instalación contra registros fraudulentos y llamadas no autorizadas.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-8"> <span>Integrar una centralita o un proveedor telefónico con una aplicación.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-9"> <span>Diseñar una arquitectura de voz para una persona, un pequeño negocio o un agente de IA.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="comp-10"> <span>Saber qué parte puedes mantener tú y qué parte conviene contratar.</span></label>
+        </div>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn next" data-goto="1">Siguiente: CONCEPTOS Y REDES ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 1: CONCEPTOS Y REDES (Módulos 1, 2, 3 y 4)
+         ========================================== -->
+    <section class="tab-section" id="sec-1" data-t="CONCEPTOS Y REDES">
+      <div class="card">
+        <h2>MÓDULO 1. QUÉ ES VOIP Y QUÉ NO ES</h2>
+
+        <h3>1.1. Definición sencilla</h3>
+        <p>VoIP significa <em>Voice over Internet Protocol</em>: voz transportada mediante redes que utilizan el Protocolo de Internet (IP).</p>
+        <p>En una llamada telefónica tradicional, la voz se transportaba mediante tecnologías y redes telefónicas específicas. En VoIP, el sonido del micrófono se convierte en datos digitales, se divide en paquetes y viaja por una red IP hasta el otro extremo, donde se reconstruye como sonido.</p>
+        <p>No significa necesariamente “llamar gratis por Internet”. Puede haber costes por conectividad, números telefónicos, minutos, servicios de operador, servidores, grabación o inteligencia artificial.</p>
+
+        <h3>1.2. Ejemplos que ya conoces</h3>
+        <ul>
+          <li>Una llamada de WhatsApp o Signal utiliza comunicación de voz sobre redes IP, aunque no necesariamente SIP.</li>
+          <li>Una extensión telefónica de una oficina puede ser un teléfono IP conectado a una centralita.</li>
+          <li>Un agente de IA puede recibir una llamada telefónica convencional y conversar con el usuario mediante una pasarela SIP y un motor de voz.</li>
+          <li>Un softphone es una aplicación que convierte un ordenador o móvil en un terminal telefónico.</li>
+        </ul>
+        <div class="callout">
+          <strong>Distinción fundamental:</strong> VoIP es la familia de soluciones. SIP, RTP y WebRTC son tecnologías/protocolos diferentes que pueden participar en una solución VoIP. No son sinónimos.
+        </div>
+
+        <h3>1.3. Cuatro escenarios reales</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Escenario</th>
+                <th>Qué necesitas</th>
+                <th>¿Hace falta un número público?</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Llamada entre dos dispositivos de una red privada</td>
+                <td>Dos terminales y una forma de conectarlos</td>
+                <td>No</td>
+              </tr>
+              <tr>
+                <td>Extensiones de una oficina</td>
+                <td>Centralita IP y terminales</td>
+                <td>No necesariamente</td>
+              </tr>
+              <tr>
+                <td>Llamar o recibir llamadas de teléfonos normales</td>
+                <td>Operador/proveedor conectado a la red telefónica</td>
+                <td>Normalmente sí</td>
+              </tr>
+              <tr>
+                <td>Conversación de voz con un agente de IA</td>
+                <td>Cliente de voz, transporte en tiempo real y motor de IA</td>
+                <td>Solo si debe comunicarse con la red telefónica pública</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout success">
+          <h4>Práctica 1: identifica VoIP a tu alrededor</h4>
+          <p>Haz una lista de cinco situaciones donde utilizas voz digital. Para cada una anota:</p>
+          <ul>
+            <li>Quién inicia la llamada.</li>
+            <li>Qué dispositivo utiliza.</li>
+            <li>Si ambos usuarios necesitan la misma aplicación.</li>
+            <li>Si interviene un número telefónico normal.</li>
+            <li>Si puedes llamar cuando el otro usuario no tiene esa aplicación abierta.</li>
+          </ul>
+          <p><strong>Comprobación:</strong> debes poder explicar por qué una llamada de WhatsApp y una llamada desde un teléfono SIP son ambas comunicaciones de voz IP, pero no necesariamente usan el mismo protocolo de señalización.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 2. LAS PIEZAS DE UNA LLAMADA</h2>
+        <p>Antes de tocar configuraciones, aprende a separar las funciones.</p>
+
+        <h3>2.1. Señalización: SIP</h3>
+        <p>SIP (<em>Session Initiation Protocol</em>) sirve para iniciar, modificar y terminar sesiones de comunicación. Es el protocolo de señalización más habitual en telefonía IP empresarial.</p>
+        <p>SIP negocia quién llama, a quién, qué capacidades multimedia se utilizarán y cómo se gestionará la sesión. <strong>SIP no transporta normalmente el audio de la conversación.</strong></p>
+        <p>Mensajes SIP importantes:</p>
+        <ul>
+          <li><code>INVITE</code>: solicita iniciar una sesión.</li>
+          <li><code>100 Trying</code>: el servidor está procesando la solicitud.</li>
+          <li><code>180 Ringing</code>: el destino está sonando.</li>
+          <li><code>183 Session Progress</code>: informa de progreso y puede incluir medios tempranos.</li>
+          <li><code>200 OK</code>: la solicitud ha sido aceptada.</li>
+          <li><code>ACK</code>: confirma la respuesta final a un INVITE.</li>
+          <li><code>BYE</code>: termina una sesión establecida.</li>
+          <li><code>CANCEL</code>: cancela un intento de llamada todavía no establecido.</li>
+          <li><code>REGISTER</code>: registra un terminal ante un servidor SIP.</li>
+          <li><code>OPTIONS</code>: consulta capacidades o disponibilidad, según el sistema.</li>
+        </ul>
+        <p>No memorices los mensajes sin contexto. En el módulo de diagnóstico aprenderás a reconocerlos en una captura.</p>
+
+        <h3>2.2. Audio: RTP y RTCP</h3>
+        <p>RTP (<em>Real-time Transport Protocol</em>) transporta normalmente los paquetes de audio y vídeo en tiempo real. Incluye información como números de secuencia y marcas de tiempo.</p>
+        <p>RTCP acompaña a RTP y permite intercambiar información de control y estadísticas sobre la calidad de la sesión.</p>
+        <p>RTP no garantiza por sí mismo que todos los paquetes lleguen a tiempo. La red puede perder, retrasar o reordenar paquetes. La aplicación debe gestionar esos problemas.</p>
+
+        <h3>2.3. Códecs</h3>
+        <p>Un códec codifica y decodifica el audio. Determina cómo se representa la voz y cuánto ancho de banda necesita, entre otros aspectos.</p>
+        <p>Algunos nombres habituales:</p>
+        <ul>
+          <li><strong>G.711 A-law / $\mu$-law:</strong> voz telefónica clásica, sin compresión perceptual importante; suele consumir alrededor de $64\text{ kbit/s}$ de carga útil por sentido, sin contar cabeceras.</li>
+          <li><strong>G.729:</strong> códec comprimido de baja tasa; revisa siempre licencias y disponibilidad actual antes de utilizarlo.</li>
+          <li><strong>Opus:</strong> códec moderno y flexible, muy utilizado en WebRTC y aplicaciones de voz.</li>
+          <li><strong>G.722:</strong> voz de banda ancha en ciertos sistemas SIP.</li>
+        </ul>
+        <p>Dos extremos deben acordar un códec compatible. Si no existe una combinación común, la llamada puede fallar o necesitar transcodificación.</p>
+
+        <h3>2.4. PBX o centralita</h3>
+        <p>Una PBX (<em>Private Branch Exchange</em>) es una centralita que gestiona extensiones y rutas de llamadas. Puede proporcionar:</p>
+        <ul>
+          <li>Extensiones internas.</li>
+          <li>Grupos de timbrado.</li>
+          <li>Menús de voz (IVR).</li>
+          <li>Buzón de voz.</li>
+          <li>Colas de atención.</li>
+          <li>Horarios y desvíos.</li>
+          <li>Grabación, si está habilitada y se cumplen las obligaciones legales.</li>
+          <li>Conexión con operadores telefónicos.</li>
+        </ul>
+        <p>Asterisk es una plataforma de software muy conocida para construir centralitas y aplicaciones de telefonía.</p>
+
+        <h3>2.5. Trunk SIP</h3>
+        <p>Un <em>SIP trunk</em> es una conexión lógica entre una centralita o plataforma y un proveedor de telefonía. Puede permitir que el sistema reciba llamadas desde números públicos o realice llamadas hacia ellos.</p>
+        <p>Una extensión SIP no es lo mismo que un trunk:</p>
+        <ul>
+          <li>La extensión representa un terminal o usuario dentro del sistema.</li>
+          <li>El trunk conecta el sistema con otro sistema telefónico, frecuentemente un operador.</li>
+        </ul>
+
+        <h3>2.6. PSTN, DID y numeración</h3>
+        <ul>
+          <li><strong>PSTN:</strong> red telefónica pública conmutada, expresión habitual para la red telefónica pública.</li>
+          <li><strong>DID:</strong> número telefónico directo que el proveedor asigna para recibir llamadas.</li>
+          <li><strong>Caller ID:</strong> identidad/número presentado como origen de una llamada, sujeto a reglas y validaciones del proveedor y la normativa.</li>
+          <li><strong>E.164:</strong> formato internacional de numeración, por ejemplo <code>+34...</code> para España.</li>
+        </ul>
+
+        <div class="callout success">
+          <h4>Práctica 2: dibuja una llamada</h4>
+          <p>Dibuja dos móviles y un servidor central. Añade dos flechas diferentes:</p>
+          <ol>
+            <li>Una flecha de señalización SIP para establecer la sesión.</li>
+            <li>Dos flechas RTP para el audio en ambos sentidos.</li>
+          </ol>
+          <p>Explica por qué el servidor puede participar en la señalización sin estar necesariamente en el camino del audio.</p>
+          <p><strong>Comprobación:</strong> si dices “SIP lleva la voz”, vuelve a leer este módulo. La distinción entre señalización y medios es uno de los fundamentos de VoIP.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 3. REDES: LO QUE HACE QUE LA VOZ SUENE BIEN O MAL</h2>
+
+        <h3>3.1. Ancho de banda no es calidad</h3>
+        <p>Una llamada puede tener ancho de banda suficiente y aun así sonar mal. La voz en tiempo real es sensible a:</p>
+        <ul>
+          <li><strong>Latencia:</strong> tiempo que tarda el audio en llegar.</li>
+          <li><strong>Jitter:</strong> variación del tiempo de llegada de los paquetes.</li>
+          <li><strong>Pérdida de paquetes:</strong> paquetes que no llegan.</li>
+          <li><strong>Reordenamiento:</strong> paquetes que llegan en un orden distinto.</li>
+          <li><strong>Congestión:</strong> exceso de tráfico en algún punto de la red.</li>
+        </ul>
+        <p>La latencia excesiva hace que las personas se interrumpan. El jitter produce cortes o sonido irregular. La pérdida puede provocar huecos o distorsión.</p>
+
+        <h3>3.2. UDP y TCP</h3>
+        <ul>
+          <li>UDP suele utilizarse para transportar RTP porque evita esperar retransmisiones que podrían llegar demasiado tarde para una conversación.</li>
+          <li>TCP ofrece entrega ordenada y retransmisión, útil para muchas aplicaciones y también posible para señalización SIP.</li>
+          <li>SIP puede funcionar sobre UDP, TCP o TLS, según la plataforma.</li>
+          <li>WebRTC utiliza mecanismos específicos de transporte y seguridad; no debe simplificarse como “RTP normal por Internet”.</li>
+        </ul>
+
+        <h3>3.3. NAT: por qué el router complica las llamadas</h3>
+        <p>NAT permite que varios dispositivos privados compartan una dirección IP pública. Es útil para navegar, pero puede complicar las conexiones entrantes y el tráfico multimedia.</p>
+        <p>Un terminal puede anunciar en la señalización una dirección privada como <code>192.168.1.20</code>. Esa dirección no es directamente alcanzable desde Internet.</p>
+        <p>Soluciones posibles, según arquitectura:</p>
+        <ul>
+          <li>Configuración correcta de NAT en el servidor y terminal.</li>
+          <li>STUN para descubrir la dirección/reflexión pública observada.</li>
+          <li>TURN para retransmitir medios cuando no se puede establecer una ruta directa.</li>
+          <li>ICE para recopilar y probar candidatos de conectividad.</li>
+          <li>SBC (<em>Session Border Controller</em>) para interconectar, proteger y controlar sesiones en entornos de operador/empresa.</li>
+        </ul>
+        <p>No son piezas intercambiables. STUN no es un servidor de retransmisión general; TURN sí puede retransmitir tráfico. ICE coordina la selección de rutas.</p>
+
+        <h3>3.4. Prueba básica de red</h3>
+        <p>En Ubuntu abre una terminal:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Prueba básica de latencia y pérdida con ping</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>ping -c 20 1.1.1.1</code></pre>
+        </div>
+        <p>Observa:</p>
+        <ul>
+          <li>Tiempo medio.</li>
+          <li>Variación de tiempos.</li>
+          <li>Paquetes perdidos.</li>
+        </ul>
+        <p>Esto no certifica que VoIP vaya a funcionar: solo es una primera observación. El destino, la ruta y la hora influyen. Para evaluar una llamada real hay que observar sus estadísticas de medios.</p>
+
+        <div class="callout success">
+          <h4>Práctica 3: compara dos conexiones</h4>
+          <p>Haz la prueba:</p>
+          <ol>
+            <li>Con el ordenador conectado al router.</li>
+            <li>Con el ordenador conectado a un punto de acceso móvil, si dispones de él.</li>
+          </ol>
+          <p>Anota pérdida y tiempos. Después realiza una llamada de prueba y describe si percibes diferencias.</p>
+          <p><strong>Comprobación:</strong> debes poder explicar por qué un ping correcto no demuestra por sí solo que una llamada SIP/RTP funcione.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 4. TU PRIMERA LLAMADA IP SIN CENTRALITA</h2>
+        <p>El objetivo es comprender una llamada entre dos terminales sin contratar un número público.</p>
+
+        <h3>4.1. Qué vas a montar</h3>
+        <p>Dos softphones en una misma red local. Dependiendo de la aplicación, puedes usar una función de llamada directa por dirección IP o una cuenta de prueba en un servidor SIP. La llamada directa no siempre está disponible ni funciona igual en todas las aplicaciones.</p>
+        <p>Para una primera práctica, utiliza dos dispositivos conectados al mismo router y una aplicación que documente expresamente llamadas SIP directas o llamadas entre usuarios de su servicio.</p>
+        <div class="callout warn">
+          <strong>No inventes direcciones ni abras puertos al azar.</strong> Anota las direcciones IP locales de los dispositivos y sigue el procedimiento documentado por el softphone elegido.
+        </div>
+
+        <h3>4.2. Instala un softphone</h3>
+        <p>Opciones conocidas:</p>
+        <ul>
+          <li>Linphone: cliente de comunicaciones SIP disponible en varias plataformas.</li>
+          <li>MicroSIP: softphone SIP para Windows.</li>
+          <li>Otros clientes SIP: elige uno que permita ver la cuenta, el servidor, el transporte y los registros.</li>
+        </ul>
+        <p>Descarga solo desde el sitio oficial del proyecto. Revisa permisos de micrófono, notificaciones y batería en Android.</p>
+
+        <h3>4.3. Prueba de audio</h3>
+        <ol>
+          <li>Conecta auriculares.</li>
+          <li>Comprueba que el sistema operativo permite usar el micrófono.</li>
+          <li>Realiza una llamada de prueba entre dos terminales.</li>
+          <li>Habla durante un minuto.</li>
+          <li>Prueba el silencio/mute.</li>
+          <li>Comprueba qué ocurre al bloquear la pantalla.</li>
+          <li>Finaliza la llamada y verifica que ambos terminales vuelven al estado normal.</li>
+        </ol>
+
+        <div class="callout success">
+          <h4>Práctica 4: ficha de la llamada</h4>
+          <p>Registra:</p>
+          <ul>
+            <li>Dispositivo A y dispositivo B.</li>
+            <li>Aplicación utilizada.</li>
+            <li>Red utilizada.</li>
+            <li>Método de conexión.</li>
+            <li>¿Se oye en ambos sentidos?</li>
+            <li>¿Hay eco?</li>
+            <li>¿Qué ocurre al bloquear el móvil?</li>
+            <li>¿Qué ocurre al cambiar de Wi-Fi a datos móviles?</li>
+          </ul>
+          <p><strong>Comprobación:</strong> no basta con que el teléfono “suene”. Debes confirmar audio bidireccional y cierre correcto de la sesión.</p>
+        </div>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="0">⬅ Anterior: INICIO</button>
+        <button class="nav-step-btn next" data-goto="2">Siguiente: ASTERISK Y CENTRALITA ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 2: ASTERISK Y CENTRALITA (Módulos 5, 6 y 7)
+         ========================================== -->
+    <section class="tab-section" id="sec-2" data-t="ASTERISK Y CENTRALITA">
+      <div class="card">
+        <h2>MÓDULO 5. CONSTRUIR UNA CENTRALITA CON ASTERISK</h2>
+        <p>Este módulo introduce una PBX real. Asterisk es potente, pero su configuración exige atención. No es un juguete que deba exponerse a Internet sin seguridad.</p>
+
+        <h3>5.1. Arquitectura del laboratorio</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Diagrama de arquitectura del laboratorio PBX</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Softphone A ── SIP/RTP ──┐
+                         ├── Asterisk (PBX) ── reglas de llamadas
+Softphone B ── SIP/RTP ──┘</code></pre>
+        </div>
+        <p>La PBX recibe señalización, autentica extensiones y aplica reglas de encaminamiento. Según la configuración, el audio puede pasar por la PBX o seguir otro camino.</p>
+
+        <h3>5.2. Preparar el sistema</h3>
+        <p>Recomendación didáctica: instala Ubuntu Server en una máquina virtual o en un equipo de laboratorio. Haz una instantánea de la máquina antes de experimentar.</p>
+        <p>Actualiza el sistema:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Actualizar Ubuntu Server</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo apt update
+sudo apt upgrade -y</code></pre>
+        </div>
+
+        <p>Consulta la versión de Asterisk disponible en los repositorios de tu distribución:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Consultar versión disponible de Asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>apt policy asterisk</code></pre>
+        </div>
+
+        <p>Si decides instalar el paquete de la distribución:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Instalar paquete Asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo apt install asterisk</code></pre>
+        </div>
+
+        <p>Comprueba el servicio:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Verificar estado del servicio Asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo systemctl status asterisk</code></pre>
+        </div>
+
+        <p>Entra en la consola de Asterisk:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Abrir consola CLI de Asterisk con verbosidad</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo asterisk -rvvv</code></pre>
+        </div>
+
+        <p>Para salir de la consola escribe:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>CLI Asterisk — Salir de la consola</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>exit</code></pre>
+        </div>
+
+        <div class="callout warn">
+          <strong>Nota de versiones:</strong> los nombres de paquetes, módulos y rutas pueden cambiar según la versión de Ubuntu y Asterisk. La documentación oficial de la versión instalada prevalece sobre este tutorial. Para aprendizaje inicial es preferible el paquete mantenido por la distribución a compilar sin necesidad.
+        </div>
+
+        <h3>5.3. Comprende PJSIP</h3>
+        <p>En Asterisk moderno se utiliza habitualmente PJSIP para gestionar terminales SIP.</p>
+        <p>Conceptos:</p>
+        <ul>
+          <li><strong>Endpoint:</strong> configuración lógica del terminal SIP.</li>
+          <li><strong>AOR (Address of Record):</strong> dirección o conjunto de contactos donde se puede localizar al usuario.</li>
+          <li><strong>Auth:</strong> credenciales utilizadas para autenticar.</li>
+          <li><strong>Transport:</strong> transporte SIP, por ejemplo UDP o TCP.</li>
+          <li><strong>Dialplan:</strong> reglas que indican qué hacer cuando se marca un número o extensión.</li>
+        </ul>
+        <p>No confundas un endpoint de Asterisk con una dirección IP física. Es un objeto de configuración que describe cómo tratar a un dispositivo o conexión.</p>
+
+        <h3>5.4. Configuración didáctica de dos extensiones</h3>
+        <p>Los ficheros suelen encontrarse en <code>/etc/asterisk/</code>. Antes de modificar nada, haz una copia:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Bash — Copia de seguridad de /etc/asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo cp -a /etc/asterisk /etc/asterisk.backup</code></pre>
+        </div>
+
+        <p>La configuración siguiente es un <strong>esquema didáctico</strong>, no una receta universal para producción. Debes adaptar nombres de transporte, direcciones, módulos y sintaxis a la versión instalada y validar la configuración en la consola de Asterisk.</p>
+        <p>Ejemplo conceptual de dos extensiones:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>INI — /etc/asterisk/pjsip.conf (esquema didáctico)</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>; pjsip.conf — esquema didáctico
+[transport-udp]
+type=transport
+protocol=udp
+bind=0.0.0.0:5060
+
+[101]
+type=endpoint
+context=internos
+disallow=all
+allow=ulaw
+auth=auth101
+aors=aor101
+
+[auth101]
+type=auth
+auth_type=userpass
+username=101
+password=CAMBIAR_POR_UNA_CLAVE_LARGA_Y_UNICA
+
+[aor101]
+type=aor
+max_contacts=1
+
+[102]
+type=endpoint
+context=internos
+disallow=all
+allow=ulaw
+auth=auth102
+aors=aor102
+
+[auth102]
+type=auth
+auth_type=userpass
+username=102
+password=OTRA_CLAVE_LARGA_Y_UNICA
+
+[aor102]
+type=aor
+max_contacts=1</code></pre>
+        </div>
+        <p>En configuraciones PJSIP, las secciones con el mismo nombre pueden representar objetos distintos mediante <code>type</code>. Revisa la documentación oficial y ejemplos de la versión exacta para evitar duplicaciones o errores de sintaxis. Para un laboratorio reproducible, conviene utilizar nombres diferenciados para endpoint, auth y aor cuando el esquema lo permita.</p>
+
+        <p>Ejemplo conceptual de dialplan:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>INI — /etc/asterisk/extensions.conf (esquema didáctico)</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>; extensions.conf
+[internos]
+exten => 101,1,NoOp(Llamada a extension 101)
+ same => n,Dial(PJSIP/101,20)
+ same => n,Hangup()
+
+exten => 102,1,NoOp(Llamada a extension 102)
+ same => n,Dial(PJSIP/102,20)
+ same => n,Hangup()</code></pre>
+        </div>
+        <p>El dialplan define qué hace la centralita al recibir una llamada dirigida a <code>101</code> o <code>102</code>. En este ejemplo, intenta llamar al terminal correspondiente durante 20 segundos y después finaliza.</p>
+        <div class="callout danger">
+          <strong>Aviso importante:</strong> el ejemplo ilustra los conceptos, pero la configuración completa depende del transporte, los nombres de objetos y el entorno. No copies bloques parciales a un sistema productivo. Utiliza la guía PJSIP oficial para construir y validar un laboratorio coherente.
+        </div>
+
+        <h3>5.5. Inspeccionar Asterisk</h3>
+        <p>En la consola:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>CLI Asterisk — Comandos de inspección de PJSIP y canales</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>pjsip show endpoints
+pjsip show contacts
+pjsip show registrations
+dialplan show internos
+core show channels</code></pre>
+        </div>
+
+        <p>Para activar depuración SIP en un laboratorio:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>CLI Asterisk — Activar logger PJSIP</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>pjsip set logger on</code></pre>
+        </div>
+
+        <p>Para apagarla:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>CLI Asterisk — Desactivar logger PJSIP</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>pjsip set logger off</code></pre>
+        </div>
+        <p>La salida puede contener números, direcciones y datos personales. No publiques capturas sin revisarlas.</p>
+
+        <div class="callout success">
+          <h4>Práctica 5: crea dos extensiones</h4>
+          <ol>
+            <li>Configura dos extensiones de laboratorio.</li>
+            <li>Configura los softphones con usuario, contraseña y dirección de tu PBX.</li>
+            <li>Registra ambos.</li>
+            <li>Comprueba que aparecen como contactos.</li>
+            <li>Llama de 101 a 102.</li>
+            <li>Repite en sentido inverso.</li>
+            <li>Desconecta un terminal y observa el estado.</li>
+            <li>Revisa los mensajes SIP.</li>
+          </ol>
+          <p><strong>Resultado esperado:</strong> puedes explicar qué hizo el <code>REGISTER</code>, qué ocurrió con el <code>INVITE</code>, qué respuesta indicó que el destino sonaba y qué mensaje terminó la llamada.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 6. PLAN DE MARCADO Y FUNCIONES DE UNA CENTRALITA</h2>
+        <p>Una centralita no es simplemente un servidor que conecta dos teléfonos. Es un sistema de reglas.</p>
+
+        <h3>6.1. Funciones que puedes construir</h3>
+        <ul>
+          <li>Extensiones internas.</li>
+          <li>Grupos de timbrado.</li>
+          <li>Horarios de apertura.</li>
+          <li>Desvío si no responde.</li>
+          <li>Buzón de voz.</li>
+          <li>Menú IVR: “Pulse 1 para ventas”.</li>
+          <li>Colas de espera.</li>
+          <li>Música en espera.</li>
+          <li>Conferencias.</li>
+          <li>Grabación, con base jurídica, información y controles adecuados.</li>
+          <li>Integración con CRM o sistemas de tickets.</li>
+        </ul>
+
+        <h3>6.2. Ejemplo práctico: pequeña empresa</h3>
+        <p>Imagina un negocio con:</p>
+        <ul>
+          <li>Extensión 101: administración.</li>
+          <li>Extensión 102: ventas.</li>
+          <li>Extensión 103: soporte.</li>
+          <li>Número público: entrada general.</li>
+        </ul>
+        <p>Flujo:</p>
+        <ol>
+          <li>El cliente llama al número público.</li>
+          <li>La llamada entra por el proveedor SIP.</li>
+          <li>La centralita reproduce un mensaje.</li>
+          <li>El cliente elige una opción.</li>
+          <li>La PBX envía la llamada al grupo correspondiente.</li>
+          <li>Si nadie responde, se ofrece buzón o devolución de llamada.</li>
+        </ol>
+
+        <div class="callout success">
+          <h4>Práctica 6: diseña tu plan de marcado</h4>
+          <p>En papel, diseña una centralita de tres personas. Define:</p>
+          <ul>
+            <li>Extensiones.</li>
+            <li>Horario.</li>
+            <li>Qué pasa fuera de horario.</li>
+            <li>Qué pasa si no contestan.</li>
+            <li>Qué pasa si todas las líneas están ocupadas.</li>
+            <li>Qué datos se guardan y durante cuánto tiempo.</li>
+          </ul>
+          <p><strong>Comprobación:</strong> una persona que no conozca tu proyecto debe poder seguir el diagrama y entender cómo se enruta cada llamada.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 7. CONECTAR CON LA TELEFONÍA PÚBLICA</h2>
+        <p>Hasta ahora has trabajado en un laboratorio privado. Para llamar a un móvil o fijo convencional necesitas una conexión con un proveedor que tenga acceso a la red telefónica pública.</p>
+
+        <h3>7.1. Qué contratas</h3>
+        <p>Un proveedor puede ofrecer:</p>
+        <ul>
+          <li>Número geográfico o no geográfico.</li>
+          <li>Recepción de llamadas.</li>
+          <li>Llamadas salientes.</li>
+          <li>Trunk SIP.</li>
+          <li>Canales concurrentes.</li>
+          <li>Tarifas por minuto o paquetes.</li>
+          <li>Autenticación por usuario/contraseña o por IP, según el proveedor.</li>
+          <li>Restricciones de origen y destino.</li>
+        </ul>
+        <p>La disponibilidad de numeración, portabilidad, identificación de llamada y condiciones de uso dependen del país y del proveedor.</p>
+
+        <h3>7.2. Arquitectura típica</h3>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Diagrama de conexión entre red pública PSTN, SIP Trunk y Asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Teléfono móvil convencional
+          │
+          ▼
+Red telefónica pública
+          │
+          ▼
+Proveedor de telefonía / SIP trunk
+          │
+          ▼
+Centralita Asterisk
+          │
+          ├── Extensión 101
+          ├── Extensión 102
+          └── IVR / buzón / agente</code></pre>
+        </div>
+
+        <h3>7.3. Antes de contratar</h3>
+        <p>Pregunta al proveedor:</p>
+        <ol>
+          <li>¿Ofrece SIP trunk estándar?</li>
+          <li>¿Permite llamadas entrantes y salientes?</li>
+          <li>¿Qué códecs admite?</li>
+          <li>¿Usa autenticación por IP o credenciales?</li>
+          <li>¿Soporta TLS y SRTP?</li>
+          <li>¿Qué límites de llamadas simultáneas aplica?</li>
+          <li>¿Cómo se valida el número de origen?</li>
+          <li>¿Qué tarifas se aplican a móviles, fijos e internacionales?</li>
+          <li>¿Qué ocurre con llamadas de emergencia?</li>
+          <li>¿Cómo se gestionan portabilidad, soporte y averías?</li>
+        </ol>
+        <p>No elijas solo por el precio por minuto. Comprueba compatibilidad, soporte, calidad, condiciones contractuales y cumplimiento normativo.</p>
+
+        <div class="callout success">
+          <h4>Práctica 7: simulación comercial</h4>
+          <p>Sin contratar todavía, compara dos proveedores reales usando sus tarifas y documentación. Crea una tabla con coste fijo, coste variable, número, canales, requisitos, seguridad y soporte.</p>
+          <p><strong>Comprobación:</strong> debes poder explicar por qué una cuenta SIP gratuita de laboratorio no equivale a disponer de un número telefónico público.</p>
+        </div>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="1">⬅ Anterior: CONCEPTOS Y REDES</button>
+        <button class="nav-step-btn next" data-goto="3">Siguiente: WEBRTC, IA Y ANDROID ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 3: WEBRTC, IA Y ANDROID (Módulos 10, 11 y 12)
+         ========================================== -->
+    <section class="tab-section" id="sec-3" data-t="WEBRTC, IA Y ANDROID">
+      <div class="card">
+        <h2>MÓDULO 10. WEBRTC: VOZ DESDE EL NAVEGADOR Y APLICACIONES</h2>
+
+        <h3>10.1. Qué es WebRTC</h3>
+        <p>WebRTC permite comunicaciones de audio, vídeo y datos en tiempo real desde navegadores y aplicaciones compatibles. No es un sustituto exacto de SIP; resuelve otro conjunto de problemas y puede interconectarse con SIP mediante una pasarela o servidor compatible.</p>
+        <p>WebRTC incorpora mecanismos de negociación, seguridad, transporte y conectividad. En el establecimiento de medios intervienen conceptos como ICE, STUN y TURN.</p>
+
+        <h3>10.2. SIP frente a WebRTC</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>SIP</th>
+                <th>WebRTC</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Protocolo de señalización de sesiones</td>
+                <td>Conjunto de tecnologías/API para comunicación en tiempo real</td>
+              </tr>
+              <tr>
+                <td>Muy extendido en telefonía IP</td>
+                <td>Muy extendido en navegador y aplicaciones modernas</td>
+              </tr>
+              <tr>
+                <td>Puede usar RTP como transporte de medios</td>
+                <td>Utiliza mecanismos de medios seguros propios del ecosistema WebRTC</td>
+              </tr>
+              <tr>
+                <td>Habitual en PBX, teléfonos IP y trunks</td>
+                <td>Habitual en apps web, móviles y plataformas de tiempo real</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Una aplicación puede usar WebRTC en el cliente y SIP hacia un operador telefónico. Un puente convierte o adapta la comunicación entre ambos lados.</p>
+
+        <h3>10.3. ICE, STUN y TURN</h3>
+        <ul>
+          <li><strong>ICE:</strong> mecanismo para probar rutas de conectividad.</li>
+          <li><strong>STUN:</strong> ayuda a descubrir cómo se ve el dispositivo desde fuera de su NAT.</li>
+          <li><strong>TURN:</strong> retransmite tráfico cuando no se puede establecer una ruta directa.</li>
+          <li><strong>DTLS-SRTP:</strong> mecanismo utilizado por WebRTC para proteger los medios.</li>
+        </ul>
+
+        <h3>10.4. Cuándo elegir WebRTC</h3>
+        <ul>
+          <li>Quieres que una persona hable desde una página web sin instalar un softphone SIP.</li>
+          <li>Quieres audio bidireccional en una aplicación propia.</li>
+          <li>Quieres construir una interfaz móvil/web para un agente de IA.</li>
+          <li>Necesitas una sala de audio con varios participantes.</li>
+        </ul>
+
+        <div class="callout success">
+          <h4>Práctica 10: analiza una arquitectura híbrida</h4>
+          <p>Dibuja:</p>
+          <div class="code-wrap">
+            <div class="code-header">
+              <span>Diagrama de arquitectura híbrida WebRTC a SIP</span>
+              <button class="copy-btn" type="button">COPIAR</button>
+            </div>
+            <pre><code>Navegador / App WebRTC
+          │
+          ▼
+Servidor de tiempo real
+          │
+          ▼
+Pasarela SIP
+          │
+          ▼
+Proveedor telefónico
+          │
+          ▼
+Teléfono convencional</code></pre>
+          </div>
+          <p>Explica qué componente hace la señalización SIP, cuál gestiona los medios WebRTC y dónde se conecta la red telefónica.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 11. VOIP PARA AUTOMATIZACIÓN Y AGENTES DE IA</h2>
+        <p>Aquí VoIP deja de ser solo telefonía y se convierte en una interfaz para sistemas inteligentes.</p>
+
+        <h3>11.1. Una llamada con IA no es una sola tecnología</h3>
+        <p>Un agente de voz suele necesitar:</p>
+        <ol>
+          <li><strong>Canal telefónico o cliente:</strong> recibe y envía audio.</li>
+          <li><strong>Control de llamada:</strong> acepta, rechaza, transfiere y finaliza.</li>
+          <li><strong>Transporte de medios:</strong> mueve audio en tiempo real.</li>
+          <li><strong>Detección de turnos:</strong> determina cuándo termina de hablar la persona.</li>
+          <li><strong>Reconocimiento de voz (STT):</strong> convierte voz en texto, si se utiliza.</li>
+          <li><strong>Modelo de lenguaje:</strong> decide qué responder o qué acción ejecutar.</li>
+          <li><strong>Síntesis de voz (TTS):</strong> convierte texto en voz, si se utiliza.</li>
+          <li><strong>Herramientas y sistemas externos:</strong> CRM, agenda, base de datos, MCP, etc.</li>
+          <li><strong>Observabilidad:</strong> logs, métricas, trazas y control de errores.</li>
+        </ol>
+        <p>Algunos sistemas utilizan modelos de audio-audio que reciben y generan voz directamente, sin separar necesariamente STT y TTS en servicios visibles.</p>
+
+        <h3>11.2. Tres arquitecturas posibles</h3>
+        <h4>A. Llamada telefónica tradicional con agente de IA</h4>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Arquitectura A — Llamada PSTN a Agente IA</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Persona con móvil
+      │
+Red telefónica pública
+      │
+Proveedor SIP
+      │
+SIP / RTP
+      │
+Pasarela o servidor de medios
+      │
+Agente de IA</code></pre>
+        </div>
+
+        <h4>B. Aplicación móvil con voz en tiempo real</h4>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Arquitectura B — App Android por WebRTC a Agente IA</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Aplicación Android
+      │
+WebRTC / SDK de tiempo real
+      │
+Servidor de medios
+      │
+Agente de IA</code></pre>
+        </div>
+        <p>No requiere necesariamente un número telefónico público.</p>
+
+        <h4>C. Llamada al móvil iniciada por una aplicación</h4>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Arquitectura C — Llamada iniciada por aplicación / backend</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Aplicación / agente autorizado
+      │
+API de control
+      │
+Backend de llamadas
+      │
+Servicio de notificación / llamada
+      │
+Android
+      │
+Canal de audio en tiempo real
+      │
+Agente de IA</code></pre>
+        </div>
+        <p>Esta tercera arquitectura puede parecerse a sistemas como AgentRing. <strong>No debes asumir que una notificación push es VoIP ni que FCM transporta el audio.</strong> Una notificación puede avisar al dispositivo de una llamada entrante; después hace falta establecer y mantener el canal de audio.</p>
+
+        <h3>11.3. SIP no es MCP</h3>
+        <p>MCP (<em>Model Context Protocol</em>) permite que un modelo o aplicación invoque herramientas. No transporta la voz por sí mismo.</p>
+        <p>Una arquitectura podría ser:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Diagrama de integración MCP con Backend de llamadas y medios</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Agente / aplicación
+       │
+       ▼
+Servidor MCP
+       │ herramienta: iniciar_llamada
+       ▼
+Backend de control de llamadas
+       │
+       ├── API de proveedor / PBX
+       ├── servicio de notificaciones
+       └── servidor de medios
+                    │
+                    ▼
+               Android / IA</code></pre>
+        </div>
+        <p>MCP controla acciones de alto nivel. SIP puede controlar sesiones telefónicas. RTP o WebRTC transportan medios. Son capas con responsabilidades distintas.</p>
+
+        <h3>11.4. Herramientas de control posibles</h3>
+        <p>Un servidor MCP de llamadas podría ofrecer herramientas como:</p>
+        <ul>
+          <li><code>start_call</code>: solicitar una llamada.</li>
+          <li><code>get_call_status</code>: consultar el estado.</li>
+          <li><code>accept_call</code>: aceptar una llamada cuando corresponda.</li>
+          <li><code>hangup_call</code>: finalizarla.</li>
+          <li><code>send_message</code>: enviar un mensaje de texto asociado.</li>
+          <li><code>get_transcript</code>: obtener transcripción, si se ha habilitado.</li>
+          <li><code>get_summary</code>: obtener resumen.</li>
+          <li><code>list_recent_calls</code>: consultar llamadas recientes.</li>
+        </ul>
+        <p>No expongas una herramienta de llamadas sin autorización y límites. Una llamada saliente puede tener coste, revelar información o molestar a otra persona.</p>
+
+        <h3>11.5. Dónde encaja LiveKit</h3>
+        <p>LiveKit ofrece infraestructura de tiempo real y opciones de integración con telefonía SIP. Sus componentes pueden conectar participantes SIP con salas de medios y agentes de voz. En despliegues autogestionados, algunos servicios de telefonía se despliegan por separado; no presupongas que todas las funciones de Cloud están disponibles idénticamente en self-hosting.</p>
+
+        <div class="callout success">
+          <h4>Práctica 11: diseña un asistente telefónico</h4>
+          <p>Caso: una pequeña empresa recibe llamadas para pedir información y solicitar que le devuelvan la llamada.</p>
+          <p>Diseña:</p>
+          <ul>
+            <li>Cómo entra la llamada.</li>
+            <li>Qué ocurre si el agente IA no está disponible.</li>
+            <li>Qué información puede pedir.</li>
+            <li>Qué información no debe pedir.</li>
+            <li>Cómo transfiere a una persona.</li>
+            <li>Cómo se registra el consentimiento cuando corresponda.</li>
+            <li>Qué se guarda y por cuánto tiempo.</li>
+            <li>Cómo se corta la llamada si hay un error.</li>
+          </ul>
+          <p><strong>Comprobación:</strong> debes poder señalar qué componente controla la llamada, cuál procesa el audio y cuál toma decisiones conversacionales.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 12. ANDROID, NOTIFICACIONES Y LLAMADAS CON PANTALLA BLOQUEADA</h2>
+        <p>Una de las dificultades de la telefonía móvil es que el sistema operativo puede suspender procesos, restringir batería o limitar actividad en segundo plano.</p>
+
+        <h3>12.1. Notificación no equivale a conversación</h3>
+        <p>Una notificación push puede despertar o avisar a una aplicación. No es, por sí sola, un canal de audio bidireccional.</p>
+        <p>Una solución de llamada móvil suele necesitar:</p>
+        <ul>
+          <li>Backend que conoce el estado de la llamada.</li>
+          <li>Servicio push, por ejemplo Firebase Cloud Messaging.</li>
+          <li>Aplicación Android con permisos y servicios adecuados.</li>
+          <li>Interfaz para aceptar/rechazar.</li>
+          <li>Canal de medios, como WebRTC o una tecnología de voz equivalente.</li>
+          <li>Gestión de desconexiones, permisos, batería y finalización.</li>
+        </ul>
+
+        <h3>12.2. Pruebas reales en Android</h3>
+        <p>Prueba, por separado:</p>
+        <ol>
+          <li>Aplicación abierta.</li>
+          <li>Aplicación en segundo plano.</li>
+          <li>Pantalla bloqueada.</li>
+          <li>Ahorro de batería activado.</li>
+          <li>Wi-Fi.</li>
+          <li>Datos móviles.</li>
+          <li>Cambio de Wi-Fi a datos.</li>
+          <li>Reinicio del teléfono.</li>
+          <li>Notificaciones deshabilitadas.</li>
+          <li>Permiso de micrófono retirado.</li>
+        </ol>
+        <p>Registra qué escenarios funcionan y cuáles no. Los resultados dependen de la versión Android, fabricante, permisos, configuración de batería y arquitectura de la aplicación.</p>
+
+        <h3>12.3. Recomendación</h3>
+        <p>No construyas una app Android desde cero antes de estudiar soluciones existentes que ya resuelven notificaciones, interfaz de llamada, permisos y audio. Audita el código, la licencia, la arquitectura y la dependencia de servicios externos. Reutilizar o bifurcar un proyecto solo es correcto si su licencia lo permite y si puedes mantenerlo.</p>
+
+        <div class="callout success">
+          <h4>Práctica 12: matriz de fiabilidad</h4>
+          <p>Crea una tabla con los diez escenarios anteriores y anota:</p>
+          <ul>
+            <li>¿Llegó la notificación?</li>
+            <li>¿Se mostró la pantalla?</li>
+            <li>¿Pudo aceptarse?</li>
+            <li>¿Hubo audio en ambos sentidos?</li>
+            <li>¿Se recuperó tras perder conexión?</li>
+            <li>¿Se cerró correctamente?</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="2">⬅ Anterior: ASTERISK Y CENTRALITA</button>
+        <button class="nav-step-btn next" data-goto="4">Siguiente: PRÁCTICA Y PROYECTOS ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 4: PRÁCTICA Y PROYECTOS (Módulos 13, 14 y 15)
+         ========================================== -->
+    <section class="tab-section" id="sec-4" data-t="PRÁCTICA Y PROYECTOS">
+      <div class="card">
+        <h2>MÓDULO 13. CALIDAD, MONITORIZACIÓN Y OPERACIÓN</h2>
+        <p>Un sistema profesional no se limita a “funciona en mi teléfono”.</p>
+
+        <h3>13.1. Métricas que debes conocer</h3>
+        <ul>
+          <li>Llamadas intentadas.</li>
+          <li>Llamadas completadas.</li>
+          <li>Llamadas fallidas.</li>
+          <li>Tiempo de establecimiento.</li>
+          <li>Duración.</li>
+          <li>Pérdida de paquetes.</li>
+          <li>Jitter.</li>
+          <li>Latencia.</li>
+          <li>Códec utilizado.</li>
+          <li>Causa de finalización.</li>
+          <li>Disponibilidad del servidor.</li>
+          <li>Coste por llamada y por minuto.</li>
+        </ul>
+
+        <h3>13.2. Registros y trazabilidad</h3>
+        <p>Cada llamada debe tener un identificador correlacionable entre:</p>
+        <ul>
+          <li>API o aplicación que la solicitó.</li>
+          <li>Backend.</li>
+          <li>PBX o proveedor.</li>
+          <li>Servidor de medios.</li>
+          <li>Cliente móvil.</li>
+          <li>Agente IA.</li>
+        </ul>
+        <p>No guardes más datos de los necesarios. Separa logs técnicos de grabaciones y transcripciones. Establece permisos, plazos de conservación y procedimientos de borrado.</p>
+
+        <h3>13.3. Plan de pruebas</h3>
+        <p>Prueba al menos:</p>
+        <ul>
+          <li>Llamada normal.</li>
+          <li>Destino ocupado.</li>
+          <li>Destino no responde.</li>
+          <li>Credenciales incorrectas.</li>
+          <li>Servidor no disponible.</li>
+          <li>Red interrumpida.</li>
+          <li>Micrófono denegado.</li>
+          <li>Audio unidireccional.</li>
+          <li>Llamada larga.</li>
+          <li>Dos llamadas simultáneas.</li>
+          <li>Transferencia.</li>
+          <li>Cuelgue desde ambos extremos.</li>
+        </ul>
+
+        <div class="callout success">
+          <h4>Práctica 13: informe de calidad</h4>
+          <p>Realiza cinco llamadas de prueba y completa:</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Prueba</th>
+                  <th>Establecimiento</th>
+                  <th>Audio bidireccional</th>
+                  <th>Cortes</th>
+                  <th>Resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>2</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>3</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>4</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+                <tr><td>5</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Define qué consideras aceptable y justifica el criterio.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 14. PROYECTOS FINALES: APRENDER CON USOS REALES</h2>
+        <p>Elige uno o más proyectos. Cada uno añade complejidad.</p>
+
+        <h3>Proyecto A. Intercomunicador privado</h3>
+        <p><strong>Objetivo:</strong> hablar entre dos dispositivos sin número público.</p>
+        <p>Aprenderás: Terminales, Direccionamiento, Audio, Red local, Diagnóstico básico.</p>
+        <p>Entrega: Diagrama, Configuración, Prueba de llamada, Lista de limitaciones.</p>
+
+        <h3>Proyecto B. Centralita de tres extensiones</h3>
+        <p><strong>Objetivo:</strong> simular la telefonía de un pequeño negocio.</p>
+        <p>Aprenderás: Asterisk, PJSIP, Dialplan, Grupos y horarios, Buzón de voz.</p>
+        <p>Entrega: Tres extensiones, Menú sencillo, Horario, Pruebas de desvío, Copia de seguridad.</p>
+
+        <h3>Proyecto C. Número público conectado a una PBX</h3>
+        <p><strong>Objetivo:</strong> recibir y realizar llamadas con teléfonos convencionales.</p>
+        <p>Aprenderás: Proveedor SIP, Trunk, Numeración, Rutas entrantes y salientes, Seguridad y costes.</p>
+        <p>Entrega: Diagrama de conexión, Comparativa de proveedores, Plan de seguridad, Prueba controlada.</p>
+        <p>Solo realiza llamadas de prueba autorizadas y revisa los costes antes de activar llamadas salientes.</p>
+
+        <h3>Proyecto D. Agente de IA que atiende llamadas</h3>
+        <p><strong>Objetivo:</strong> recibir una llamada, conversar y transferir a una persona cuando sea necesario.</p>
+        <p>Aprenderás: SIP/telefonía, Medios en tiempo real, STT/TTS o audio-audio, Lógica conversacional, Herramientas, Privacidad y observabilidad.</p>
+        <p>Entrega: Flujo conversacional, Arquitectura, Pruebas de interrupción, Manejo de errores, Política de datos.</p>
+
+        <h3>Proyecto E. MCP que solicita una llamada al móvil</h3>
+        <p><strong>Objetivo:</strong> una aplicación autorizada solicita una llamada a un dispositivo Android.</p>
+        <p>Aprenderás: MCP como interfaz de herramientas, Backend de control, Notificaciones push, Cliente Android, Canal de audio, Autorización, auditoría y límites.</p>
+        <p>Entrega: Herramienta <code>start_call</code>, Estado de llamada, Aceptación/rechazo, Audio bidireccional, Cierre seguro, Registro técnico sin datos innecesarios.</p>
+        <div class="callout warn">
+          <strong>Advertencia:</strong> este proyecto no es simplemente “añadir SIP a MCP”. Son componentes diferentes. Primero demuestra cada subsistema por separado y luego intégralos.
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 15. PLAN DE ESTUDIO DE 10 SEMANAS</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Semana</th>
+                <th>Contenido</th>
+                <th>Resultado verificable</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Conceptos, SIP, RTP, códecs</td><td>Diagrama de llamada explicado</td></tr>
+              <tr><td>2</td><td>Redes, NAT, latencia, jitter</td><td>Informe de dos conexiones</td></tr>
+              <tr><td>3</td><td>Softphones y primera llamada</td><td>Llamada bidireccional</td></tr>
+              <tr><td>4</td><td>Linux y Asterisk</td><td>PBX instalada y accesible</td></tr>
+              <tr><td>5</td><td>PJSIP y extensiones</td><td>Dos extensiones registradas</td></tr>
+              <tr><td>6</td><td>Dialplan y funciones PBX</td><td>Menú o grupo de timbrado</td></tr>
+              <tr><td>7</td><td>Trunk y telefonía pública</td><td>Diseño de integración y costes</td></tr>
+              <tr><td>8</td><td>Seguridad y diagnóstico</td><td>Modelo de amenazas y pruebas</td></tr>
+              <tr><td>9</td><td>WebRTC y voz con IA</td><td>Arquitectura híbrida diseñada</td></tr>
+              <tr><td>10</td><td>Proyecto final</td><td>Demostración, documentación y evaluación</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>No pasa nada si necesitas más de diez semanas. La velocidad no es el objetivo; la competencia demostrable sí.</p>
+
+        <h3>Evaluación final interactiva</h3>
+        <p>Ponte una nota de 0 a 3 en cada capacidad (se guarda automáticamente):</p>
+        <ul>
+          <li><strong>0:</strong> no lo conozco.</li>
+          <li><strong>1:</strong> puedo explicarlo.</li>
+          <li><strong>2:</strong> puedo configurarlo con documentación.</li>
+          <li><strong>3:</strong> puedo diagnosticarlo y justificar decisiones.</li>
+        </ul>
+
+        <div class="eval-grid" id="self-eval-container">
+          <div class="eval-row"><span>1. Señalización SIP</span><select class="eval-select" data-eval="cap-1"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>2. RTP/RTCP</span><select class="eval-select" data-eval="cap-2"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>3. Códecs</span><select class="eval-select" data-eval="cap-3"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>4. PJSIP/Asterisk</span><select class="eval-select" data-eval="cap-4"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>5. Dialplan</span><select class="eval-select" data-eval="cap-5"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>6. NAT/STUN/TURN/ICE</span><select class="eval-select" data-eval="cap-6"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>7. WebRTC</span><select class="eval-select" data-eval="cap-7"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>8. Trunk SIP</span><select class="eval-select" data-eval="cap-8"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>9. Seguridad</span><select class="eval-select" data-eval="cap-9"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>10. Diagnóstico</span><select class="eval-select" data-eval="cap-10"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>11. Monitorización</span><select class="eval-select" data-eval="cap-11"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+          <div class="eval-row"><span>12. Integración con IA/MCP</span><select class="eval-select" data-eval="cap-12"><option value="0">0 — No lo conozco</option><option value="1">1 — Puedo explicarlo</option><option value="2">2 — Puedo configurarlo</option><option value="3">3 — Puedo diagnosticarlo</option></select></div>
+        </div>
+        <div class="callout" id="eval-score-summary">Puntuación total actual: <strong>0 / 36</strong></div>
+        <p>Un nivel 3 en todo no se consigue leyendo este curso: requiere experiencia con instalaciones reales, incidencias, documentación y pruebas. Este curso te proporciona el camino y las prácticas iniciales para construir esa experiencia.</p>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="3">⬅ Anterior: WEBRTC, IA Y ANDROID</button>
+        <button class="nav-step-btn next" data-goto="5">Siguiente: PROMPTS ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 5: PROMPTS (Repositorio centralizado de todos los bloques copiables, comandos, esquemas y plantillas de trabajo)
+         ========================================== -->
+    <section class="tab-section" id="sec-5" data-t="PROMPTS">
+      <div class="card">
+        <h2>REPOSITORIO COMPLETO DE PROMPTS, COMANDOS Y BLOQUES DE CONFIGURACIÓN</h2>
+        <p>En esta pestaña encontrarás reunidos todos los comandos, configuraciones de Asterisk, filtros de captura, especificaciones de herramientas MCP y prompts de asistencia técnica empleados a lo largo del tutorial, cada uno con su explicación de dónde y para qué se utiliza.</p>
+
+        <h3>1. Prueba básica de red en terminal Ubuntu (Módulo 3.4)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 3 (Redes) y Práctica 3, para medir tiempo medio de respuesta, variación de tiempos (jitter inicial) y paquetes perdidos antes de probar llamadas VoIP.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Comando Bash — Ping de 20 paquetes</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>ping -c 20 1.1.1.1</code></pre>
+        </div>
+
+        <h3>2. Preparación e instalación de Asterisk en Ubuntu Server (Módulo 5.2)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 5 para actualizar el sistema operativo de laboratorio, verificar la versión disponible en los repositorios oficiales, instalar Asterisk y comprobar el estado del servicio.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Comandos Bash — Instalación y verificación de Asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo apt update
+sudo apt upgrade -y
+apt policy asterisk
+sudo apt install asterisk
+sudo systemctl status asterisk</code></pre>
+        </div>
+
+        <h3>3. Acceso y salida de la consola CLI de Asterisk (Módulo 5.2)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 5 para abrir la interfaz de línea de comandos de Asterisk con nivel de detalle (verbosidad 3) y salir limpiamente.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Comandos CLI — Entrada y salida de consola Asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo asterisk -rvvv
+exit</code></pre>
+        </div>
+
+        <h3>4. Copia de seguridad preventiva de configuración Asterisk (Módulo 5.4)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 5.4 antes de editar cualquier fichero dentro de <code>/etc/asterisk/</code>.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Comando Bash — Backup completo de /etc/asterisk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sudo cp -a /etc/asterisk /etc/asterisk.backup</code></pre>
+        </div>
+
+        <h3>5. Esquema didáctico de extensiones PJSIP (Módulo 5.4)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 5.4 y Práctica 5 para definir el transporte UDP y las extensiones internas <code>101</code> y <code>102</code> con objetos <code>endpoint</code>, <code>auth</code> y <code>aor</code> en <code>pjsip.conf</code>.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Configuración — pjsip.conf (esquema didáctico)</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>; pjsip.conf — esquema didáctico
+[transport-udp]
+type=transport
+protocol=udp
+bind=0.0.0.0:5060
+
+[101]
+type=endpoint
+context=internos
+disallow=all
+allow=ulaw
+auth=auth101
+aors=aor101
+
+[auth101]
+type=auth
+auth_type=userpass
+username=101
+password=CAMBIAR_POR_UNA_CLAVE_LARGA_Y_UNICA
+
+[aor101]
+type=aor
+max_contacts=1
+
+[102]
+type=endpoint
+context=internos
+disallow=all
+allow=ulaw
+auth=auth102
+aors=aor102
+
+[auth102]
+type=auth
+auth_type=userpass
+username=102
+password=OTRA_CLAVE_LARGA_Y_UNICA
+
+[aor102]
+type=aor
+max_contacts=1</code></pre>
+        </div>
+
+        <h3>6. Esquema didáctico de Plan de Marcado / Dialplan (Módulo 5.4)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 5.4 y Módulo 6 para enrutar llamadas entre las extensiones <code>101</code> y <code>102</code> dentro del contexto <code>[internos]</code> en <code>extensions.conf</code>.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Configuración — extensions.conf (esquema didáctico)</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>; extensions.conf
+[internos]
+exten => 101,1,NoOp(Llamada a extension 101)
+ same => n,Dial(PJSIP/101,20)
+ same => n,Hangup()
+
+exten => 102,1,NoOp(Llamada a extension 102)
+ same => n,Dial(PJSIP/102,20)
+ same => n,Hangup()</code></pre>
+        </div>
+
+        <h3>7. Comandos de inspección y depuración PJSIP en Asterisk (Módulo 5.5)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 5.5 y Módulo 8 para verificar endpoints registrados, contactos, dialplan, canales activos y activar/desactivar la traza de paquetes SIP en vivo.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Comandos CLI Asterisk — Inspección y Logger SIP</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>pjsip show endpoints
+pjsip show contacts
+pjsip show registrations
+dialplan show internos
+core show channels
+pjsip set logger on
+pjsip set logger off</code></pre>
+        </div>
+
+        <h3>8. Filtros de captura en Wireshark para diagnóstico VoIP (Módulo 8.3)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 8.3 y Práctica 8 para filtrar señalización SIP y tráfico por puerto UDP 5060 durante el diagnóstico controlado de laboratorio.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Filtros Wireshark — Señalización SIP y puerto UDP 5060</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sip
+udp.port == 5060</code></pre>
+        </div>
+
+        <h3>9. Prompt de Auditoría de Proveedor SIP Trunk antes de contratar (Módulo 7.3)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 7.3 y Práctica 7 (simulación comercial) para evaluar técnicamente a dos proveedores de telefonía pública y comparar seguridad, códecs, canales y emergencias.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Prompt reutilizable — Evaluación técnica de Proveedores SIP Trunk</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Actúa como un arquitecto de telecomunicaciones VoIP. Necesito comparar dos proveedores de SIP Trunk para conectar una centralita Asterisk (PJSIP) a la red telefónica pública (PSTN) en España. Evalúa su documentación técnica respondiendo a estos 10 puntos:
+1. ¿Ofrece SIP trunk estándar?
+2. ¿Permite llamadas entrantes y salientes?
+3. ¿Qué códecs admite (G.711 A-law/u-law, Opus, G.722, G.729)?
+4. ¿Usa autenticación por IP o por credenciales?
+5. ¿Soporta TLS para señalización y SRTP para medios?
+6. ¿Qué límites de llamadas simultáneas (canales concurrentes) aplica?
+7. ¿Cómo se valida el número de origen (Caller ID / formato E.164)?
+8. ¿Qué tarifas se aplican a móviles, fijos e internacionales?
+9. ¿Qué ocurre con las llamadas de emergencia (112)?
+10. ¿Cómo se gestionan la portabilidad, el soporte y las averías?</code></pre>
+        </div>
+
+        <h3>10. Prompt de Diagnóstico Sistemático de Audio VoIP y NAT (Módulo 8.4)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 8.4 para guiar el diagnóstico ordenado en 10 pasos cuando una llamada no registra, no tiene audio o presenta audio en un solo sentido.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Prompt reutilizable — Diagnóstico paso a paso de incidencia SIP/RTP</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Ayúdame a diagnosticar un fallo en una llamada VoIP siguiendo estrictamente este orden de verificación sin saltar pasos:
+1. ¿Hay conectividad IP entre los componentes?
+2. ¿Resuelve correctamente el DNS?
+3. ¿El terminal llega al servidor SIP?
+4. ¿Se autentica correctamente?
+5. ¿Se establece la señalización (INVITE, 100 Trying, 180 Ringing, 200 OK, ACK)?
+6. ¿Se negocia un códec común en el SDP?
+7. ¿Se anuncian direcciones IP y puertos de medios alcanzables (sin IPs privadas 192.168.x.x hacia redes remotas)?
+8. ¿Circula tráfico RTP en ambos sentidos?
+9. ¿La calidad de red (latencia, jitter, pérdida de paquetes) es suficiente?
+10. ¿El problema está en el terminal, la PBX, el operador o la red/NAT?</code></pre>
+        </div>
+
+        <h3>11. Prompt de Diseño de Agente de Voz con IA y Herramientas MCP (Módulo 11.4 y Proyecto D/E)</h3>
+        <p><strong>Dónde se emplea:</strong> En el Módulo 11 (VoIP para automatización y agentes de IA) y en los Proyectos Finales D y E para estructurar la separación entre MCP, señalización SIP y transporte de medios WebRTC/RTP.</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Prompt reutilizable — Especificación de Agente de Voz IA + Servidor MCP</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>Diseña la arquitectura de un asistente telefónico con IA y un servidor MCP de control de llamadas.
+Separa claramente las responsabilidades:
+- Capa de herramientas MCP: start_call, get_call_status, accept_call, hangup_call, send_message, get_transcript, get_summary, list_recent_calls.
+- Capa de control y notificación: Backend de llamadas + Firebase Cloud Messaging (recordando que FCM solo avisa y no transporta voz).
+- Capa de señalización telefónica: SIP / SIP Trunk.
+- Capa de transporte de medios en tiempo real: RTP / WebRTC (LiveKit).
+- Capa conversacional: Detección de turnos, STT, LLM, TTS (o modelo audio-audio).
+Define: cómo entra la llamada, qué ocurre si la IA falla, cómo transfiere a un humano, cómo se registra el consentimiento, qué datos se guardan y qué límites de seguridad y gasto impiden llamadas no autorizadas.</code></pre>
+        </div>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="4">⬅ Anterior: PRÁCTICA Y PROYECTOS</button>
+        <button class="nav-step-btn next" data-goto="6">Siguiente: 33 Preguntas (Q&amp;A) ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 6: 33 Preguntas (Q&A) — Antes de ERRORES
+         ========================================== -->
+    <section class="tab-section" id="sec-6" data-t="33 Preguntas (Q&A)">
+      <div class="card">
+        <h2>33 PREGUNTAS Y RESPUESTAS, ORDENADAS POR DIFICULTAD</h2>
+        <p>Pulsa sobre cada pregunta para desplegar su respuesta o utiliza los botones siguientes para abrir o cerrar las 33 preguntas de una vez.</p>
+        <div class="badge-row">
+          <button class="chip" id="expand-all-qa" type="button">➕ Desplegar las 33 respuestas</button>
+          <button class="chip" id="collapse-all-qa" type="button">➖ Plegar todas</button>
+        </div>
+
+        <h3>Nivel 1 — Principiante (1–11)</h3>
+
+        <details class="qa-item" open>
+          <summary>1. ¿Qué significa VoIP?</summary>
+          <div class="qa-body">Voice over Internet Protocol: transportar voz mediante redes IP. El sonido se digitaliza, se transmite como datos y se reconstruye en el destino.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>2. ¿VoIP significa que las llamadas son gratis?</summary>
+          <div class="qa-body">No. Puede haber costes de Internet, servidores, números, operadores, minutos, almacenamiento y servicios de IA.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>3. ¿Qué es SIP?</summary>
+          <div class="qa-body">Es un protocolo de señalización que permite iniciar, modificar y finalizar sesiones de comunicación. No suele transportar el audio de la conversación.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>4. ¿Qué es RTP?</summary>
+          <div class="qa-body">Es un protocolo utilizado para transportar medios en tiempo real, como audio y vídeo. Suele acompañarse de RTCP para información de control y estadísticas.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>5. ¿Qué es una extensión?</summary>
+          <div class="qa-body">Es una identidad o destino interno de una centralita, por ejemplo 101 o 102. Puede corresponder a un teléfono, softphone o usuario.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>6. ¿Qué es una PBX?</summary>
+          <div class="qa-body">Una centralita privada que organiza extensiones, rutas, horarios, menús, grupos y otras funciones telefónicas.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>7. ¿Qué es un softphone?</summary>
+          <div class="qa-body">Una aplicación que permite realizar y recibir llamadas usando un ordenador, móvil o tableta como terminal telefónico.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>8. ¿Necesito un número de teléfono para probar VoIP?</summary>
+          <div class="qa-body">No. Puedes hacer prácticas entre terminales de una red privada o mediante un servicio de pruebas sin contratar numeración pública.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>9. ¿Qué es un códec?</summary>
+          <div class="qa-body">Es la tecnología que codifica y decodifica el audio. Afecta a calidad, consumo de ancho de banda y compatibilidad.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>10. ¿Qué es un trunk SIP?</summary>
+          <div class="qa-body">Una conexión entre una centralita/plataforma y otro sistema telefónico, habitualmente un proveedor que da acceso a la red pública.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>11. ¿Puedo usar VoIP desde Android?</summary>
+          <div class="qa-body">Sí. Mediante una aplicación SIP, una aplicación WebRTC o una app propia conectada a un servicio de voz. La arquitectura determina cómo llegan las llamadas en segundo plano.</div>
+        </details>
+
+        <h3>Nivel 2 — Intermedio (12–23)</h3>
+
+        <details class="qa-item">
+          <summary>12. ¿Cuál es la diferencia entre SIP y RTP?</summary>
+          <div class="qa-body">SIP establece y controla la sesión; RTP transporta normalmente el audio o vídeo. Son funciones distintas.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>13. ¿Qué significa que una llamada tenga audio en un solo sentido?</summary>
+          <div class="qa-body">Que los medios llegan en una dirección, pero no en la otra. Puede deberse a NAT, firewall, SDP, rutas RTP o configuración del proveedor.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>14. ¿Qué es NAT?</summary>
+          <div class="qa-body">Es una técnica que permite que dispositivos con direcciones privadas compartan una dirección pública. Puede dificultar conexiones entrantes y medios en tiempo real.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>15. ¿Qué es jitter?</summary>
+          <div class="qa-body">Es la variación en el tiempo de llegada de los paquetes. Un jitter elevado puede provocar cortes, saltos o audio irregular.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>16. ¿Qué es latencia?</summary>
+          <div class="qa-body">Es el retraso entre hablar y que la otra persona escuche. Demasiada latencia dificulta la conversación natural.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>17. ¿Qué es pérdida de paquetes?</summary>
+          <div class="qa-body">Es la proporción de paquetes que no llegan a destino. En voz puede causar huecos, distorsión o pérdida de sílabas.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>18. ¿Qué es SDP?</summary>
+          <div class="qa-body">Es un formato de descripción de sesión que informa sobre medios, direcciones, puertos, códecs y parámetros de comunicación. Suele viajar dentro de mensajes SIP.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>19. ¿Qué diferencia hay entre REGISTER e INVITE?</summary>
+          <div class="qa-body">REGISTER registra o actualiza la localización de un usuario ante un servidor SIP. INVITE intenta establecer una sesión.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>20. ¿Qué hacen STUN y TURN?</summary>
+          <div class="qa-body">STUN ayuda a descubrir la dirección/reflexión pública observada. TURN retransmite medios cuando no se puede establecer una ruta directa.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>21. ¿Qué es ICE?</summary>
+          <div class="qa-body">Es un mecanismo que recopila y prueba candidatos de conectividad para encontrar una ruta viable entre participantes, especialmente en WebRTC.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>22. ¿Qué es Asterisk?</summary>
+          <div class="qa-body">Es una plataforma de software para construir centralitas y aplicaciones de telefonía. Puede gestionar extensiones, rutas, IVR, colas y conexiones con proveedores.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>23. ¿Qué es PJSIP en Asterisk?</summary>
+          <div class="qa-body">Es el conjunto de componentes basado en la biblioteca PJSIP que Asterisk utiliza para implementar funciones SIP. En su configuración aparecen objetos como endpoint, auth, AOR y transport.</div>
+        </details>
+
+        <h3>Nivel 3 — Avanzado (24–33)</h3>
+
+        <details class="qa-item">
+          <summary>24. ¿Qué diferencia hay entre TLS y SRTP?</summary>
+          <div class="qa-body">TLS protege la señalización que circula por una conexión TLS. SRTP protege los paquetes de medios. Activar TLS no cifra automáticamente el audio.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>25. ¿Qué es un SBC?</summary>
+          <div class="qa-body">Un Session Border Controller es un elemento de borde que controla y protege sesiones de comunicaciones entre redes o dominios. Puede aplicar políticas, normalizar señalización, gestionar NAT y proteger interconexiones.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>26. ¿Por qué puede fallar una llamada aunque SIP responda correctamente?</summary>
+          <div class="qa-body">Porque establecer la señalización no garantiza que los medios funcionen. Puede fallar la negociación SDP, el códec, la ruta RTP, el firewall o la conectividad NAT.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>27. ¿Por qué WebRTC no es simplemente SIP en un navegador?</summary>
+          <div class="qa-body">WebRTC es un conjunto de API, protocolos y mecanismos de medios seguros para tiempo real. SIP es un protocolo de señalización. Pueden interconectarse, pero no son equivalentes.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>28. ¿Qué es transcodificar?</summary>
+          <div class="qa-body">Convertir audio de un códec a otro. Puede ser necesario cuando dos extremos no comparten un códec, pero consume recursos y puede afectar a calidad.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>29. ¿Qué diferencia hay entre una extensión SIP y un trunk SIP?</summary>
+          <div class="qa-body">La extensión representa un terminal o usuario interno. El trunk conecta una centralita con otro sistema, normalmente un proveedor telefónico.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>30. ¿Cómo se protege una centralita contra fraude telefónico?</summary>
+          <div class="qa-body">Con credenciales únicas y fuertes, restricciones de origen, firewall, límites de destinos y gasto, actualización, control de permisos, monitorización y respuesta rápida ante incidentes.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>31. ¿FCM transporta la conversación de voz?</summary>
+          <div class="qa-body">No. Firebase Cloud Messaging puede entregar una notificación o señal de evento a la aplicación. El audio requiere un canal de medios independiente.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>32. ¿MCP reemplaza SIP o WebRTC?</summary>
+          <div class="qa-body">No. MCP permite invocar herramientas y acciones. SIP puede controlar sesiones telefónicas y WebRTC/RTP transportan medios. MCP puede pedir que un backend inicie una llamada, pero no sustituye la telefonía.</div>
+        </details>
+
+        <details class="qa-item">
+          <summary>33. ¿Qué arquitectura elegirías para un agente de IA que recibe llamadas telefónicas?</summary>
+          <div class="qa-body">Una opción común es número público → proveedor SIP → trunk SIP → pasarela/servidor de medios → agente de IA. La elección concreta depende de latencia, volumen, coste, región, seguridad, transferencia a humanos y capacidad operativa. Para una app sin número público puede ser más sencillo usar WebRTC directamente. No hay una arquitectura universalmente mejor.</div>
+        </details>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="5">⬅ Anterior: PROMPTS</button>
+        <button class="nav-step-btn next" data-goto="7">Siguiente: ERRORES Y SEGURIDAD ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 7: ERRORES Y SEGURIDAD (Módulos 8, 9 y Legislación España)
+         ========================================== -->
+    <section class="tab-section" id="sec-7" data-t="ERRORES Y SEGURIDAD">
+      <div class="card">
+        <h2>MÓDULO 8. NAT, FIREWALL Y DIAGNÓSTICO DE AUDIO</h2>
+        <p>Esta es una de las áreas que separa al usuario ocasional del técnico competente.</p>
+
+        <h3>8.1. Síntomas típicos</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Síntoma</th>
+                <th>Causas posibles</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>El teléfono no registra</td>
+                <td>Usuario/clave, servidor, DNS, firewall, transporte</td>
+              </tr>
+              <tr>
+                <td>Suena, pero no hay audio</td>
+                <td>RTP bloqueado, NAT incorrecto, SDP incorrecto, códec</td>
+              </tr>
+              <tr>
+                <td>Audio en un solo sentido</td>
+                <td>Ruta RTP asimétrica, NAT, firewall</td>
+              </tr>
+              <tr>
+                <td>La llamada se corta al poco tiempo</td>
+                <td>Temporizadores, NAT, sesión, red o proveedor</td>
+              </tr>
+              <tr>
+                <td>Eco</td>
+                <td>Acústica, altavoz/micrófono, cancelación de eco</td>
+              </tr>
+              <tr>
+                <td>Voz entrecortada</td>
+                <td>Jitter, pérdida, congestión, CPU</td>
+              </tr>
+              <tr>
+                <td>No se puede llamar a ciertos destinos</td>
+                <td>Plan de marcado, permisos, proveedor, formato E.164</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>8.2. SDP</h3>
+        <p>SDP (<em>Session Description Protocol</em>) aparece habitualmente dentro de mensajes SIP y describe los medios que se quieren utilizar: direcciones, puertos, códecs y otros parámetros.</p>
+        <p>En una traza SIP, busca la sección SDP y comprueba:</p>
+        <ul>
+          <li>Dirección IP anunciada.</li>
+          <li>Puerto de medios.</li>
+          <li>Códecs ofrecidos.</li>
+          <li>Códecs aceptados.</li>
+          <li>Dirección de envío/recepción de medios.</li>
+        </ul>
+        <p>Una dirección privada anunciada hacia un interlocutor remoto puede ser una pista de un problema de NAT.</p>
+
+        <h3>8.3. Captura de tráfico</h3>
+        <p>Wireshark permite observar paquetes. En un laboratorio propio puedes filtrar:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Filtro Wireshark — Protocolo SIP</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>sip</code></pre>
+        </div>
+        <p>o, según el transporte:</p>
+        <div class="code-wrap">
+          <div class="code-header">
+            <span>Filtro Wireshark — Puerto UDP 5060</span>
+            <button class="copy-btn" type="button">COPIAR</button>
+          </div>
+          <pre><code>udp.port == 5060</code></pre>
+        </div>
+        <p>Para tráfico RTP, Wireshark puede identificar flujos cuando conoce la señalización o cuando se configura la decodificación adecuada. No captures llamadas ajenas. El contenido de voz y los metadatos son información sensible.</p>
+
+        <h3>8.4. Método de diagnóstico profesional</h3>
+        <p>Sigue siempre este orden:</p>
+        <ol>
+          <li>¿Hay conectividad IP entre los componentes?</li>
+          <li>¿Resuelve correctamente el DNS?</li>
+          <li>¿El terminal llega al servidor SIP?</li>
+          <li>¿Se autentica?</li>
+          <li>¿Se establece la señalización?</li>
+          <li>¿Se negocia un códec común?</li>
+          <li>¿Se anuncian direcciones y puertos de medios alcanzables?</li>
+          <li>¿Circula RTP en ambos sentidos?</li>
+          <li>¿La calidad de red es suficiente?</li>
+          <li>¿El problema está en el terminal, la PBX, el operador o la red?</li>
+        </ol>
+        <div class="callout warn">
+          No cambies cinco parámetros a la vez. Modifica una cosa, repite la prueba y documenta el resultado.
+        </div>
+
+        <div class="callout success">
+          <h4>Práctica 8: diagnóstico controlado</h4>
+          <p>En tu laboratorio:</p>
+          <ul>
+            <li>Realiza una llamada que funcione.</li>
+            <li>Guarda una captura.</li>
+            <li>Desconecta el micrófono de un terminal.</li>
+            <li>Repite la llamada.</li>
+            <li>Cambia un parámetro de audio permitido por la aplicación.</li>
+            <li>Repite y compara.</li>
+          </ul>
+          <p>No provoques fallos en redes de terceros ni modifiques la seguridad del router para experimentar.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>MÓDULO 9. SEGURIDAD: EVITAR QUE TE ROBEN LA CENTRALITA</h2>
+        <p>Una PBX expuesta y mal protegida puede convertirse en una fuente de llamadas fraudulentas. El fraude telefónico puede generar facturas muy elevadas.</p>
+
+        <h3>9.1. Riesgos principales</h3>
+        <ul>
+          <li>Contraseñas débiles o reutilizadas.</li>
+          <li>Registro SIP abierto a Internet.</li>
+          <li>Escaneo automatizado de extensiones.</li>
+          <li>Fuerza bruta contra credenciales.</li>
+          <li>Llamadas internacionales no autorizadas.</li>
+          <li>Suplantación de identidad.</li>
+          <li>Servidores sin actualizar.</li>
+          <li>Interfaces de administración expuestas.</li>
+          <li>Capturas de tráfico con audio o credenciales.</li>
+          <li>Grabaciones almacenadas sin controles.</li>
+        </ul>
+
+        <h3>9.2. Lista mínima de protección (Checklist interactivo)</h3>
+        <div>
+          <label class="check-item"><input type="checkbox" data-check="sec-1"> <span>No expongas SIP/RTP al mundo durante el aprendizaje.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-2"> <span>Usa contraseñas largas, únicas y aleatorias.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-3"> <span>Limita los orígenes permitidos cuando sea viable.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-4"> <span>Configura firewall con el mínimo de puertos necesarios.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-5"> <span>Mantén Asterisk, sistema operativo y módulos actualizados.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-6"> <span>Deshabilita extensiones y rutas que no utilices.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-7"> <span>Bloquea destinos de alto riesgo que no necesites.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-8"> <span>Establece límites de gasto y alertas con el proveedor.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-9"> <span>Separa la administración de la telefonía.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-10"> <span>Haz copias de seguridad y prueba su restauración.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-11"> <span>Revisa registros y llamadas salientes anómalas.</span></label>
+          <label class="check-item"><input type="checkbox" data-check="sec-12"> <span>Utiliza TLS/SRTP cuando los extremos y el proveedor lo soporten y estén correctamente configurados.</span></label>
+        </div>
+
+        <div class="callout danger">
+          <strong>TLS protege la señalización en tránsito; SRTP protege los medios.</strong> No des por hecho que activar uno cifra automáticamente el otro. Tampoco confundas cifrado de transporte con cifrado extremo a extremo.
+        </div>
+
+        <h3>9.3. Fraude telefónico</h3>
+        <p>Configura límites:</p>
+        <ul>
+          <li>Destinos permitidos.</li>
+          <li>Horarios de llamadas.</li>
+          <li>Número máximo de llamadas simultáneas.</li>
+          <li>Límites de duración.</li>
+          <li>Alertas por gasto.</li>
+          <li>Bloqueo inmediato de credenciales comprometidas.</li>
+        </ul>
+
+        <div class="callout success">
+          <h4>Práctica 9: modelo de amenazas</h4>
+          <p>Escribe:</p>
+          <ul>
+            <li>Qué activo proteges.</li>
+            <li>Quién podría atacarlo.</li>
+            <li>Cómo podría entrar.</li>
+            <li>Qué daño podría causar.</li>
+            <li>Qué medida reduce el riesgo.</li>
+            <li>Cómo detectarías el incidente.</li>
+          </ul>
+          <p><strong>Comprobación:</strong> debes ser capaz de explicar por qué no se debe publicar en un foro una captura de <code>pjsip.conf</code> que incluya contraseñas.</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>SEGURIDAD, PRIVACIDAD Y LEGISLACIÓN: NOTAS PARA ESPAÑA</h2>
+        <p>Este curso es técnico y no sustituye asesoramiento jurídico. Antes de desplegar un sistema real, revisa las obligaciones aplicables al servicio concreto.</p>
+        <ol>
+          <li><strong>Protección de datos:</strong> números telefónicos, identificadores, grabaciones, transcripciones y metadatos pueden ser datos personales. Aplica minimización, control de acceso, seguridad, plazos de conservación y transparencia.</li>
+          <li><strong>Grabación:</strong> no actives grabaciones por defecto. Determina finalidad, base jurídica, información a las personas, acceso, conservación y borrado. Las reglas dependen del contexto y del uso.</li>
+          <li><strong>Llamadas comerciales:</strong> no automatices campañas ni llamadas no solicitadas sin revisar la normativa de comunicaciones comerciales y protección de datos aplicable.</li>
+          <li><strong>Emergencias:</strong> no des por hecho que una solución VoIP privada o una app de voz puede llamar correctamente al 112 o proporcionar ubicación. Comprueba expresamente las capacidades y obligaciones del proveedor.</li>
+          <li><strong>Numeración y operador:</strong> si prestas servicios de comunicaciones al público o gestionas numeración, pueden existir obligaciones regulatorias específicas. Consulta fuentes oficiales y asesoramiento especializado.</li>
+          <li><strong>Seguridad:</strong> evita usar una centralita de laboratorio para llamadas reales hasta haber revisado autenticación, cifrado, firewall, rutas, límites de gasto y recuperación ante fallos.</li>
+        </ol>
+        <p>La Ley 11/2022, General de Telecomunicaciones, contempla el acceso a servicios de emergencia para los servicios de comunicaciones interpersonales disponibles al público basados en numeración en los términos previstos por la ley. La aplicación concreta depende del servicio y del operador.</p>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="6">⬅ Anterior: 33 Preguntas (Q&amp;A)</button>
+        <button class="nav-step-btn next" data-goto="8">Siguiente: RESUMEN Y GLOSARIO ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 8: RESUMEN Y GLOSARIO
+         ========================================== -->
+    <section class="tab-section" id="sec-8" data-t="RESUMEN Y GLOSARIO">
+      <div class="card">
+        <h2>RESUMEN EJECUTIVO DE CONCEPTOS CLAVE</h2>
+        <ul>
+          <li><strong>VoIP</strong> transporta voz digitalizada en paquetes sobre redes IP; no equivale automáticamente a llamadas gratuitas ni a un único protocolo.</li>
+          <li><strong>SIP</strong> se encarga de la señalización (iniciar, modificar y terminar sesiones), mientras que <strong>RTP/RTCP</strong> transportan el audio y sus estadísticas de calidad.</li>
+          <li>Los <strong>códecs</strong> (G.711 A-law/$\mu$-law, G.722, G.729, Opus) determinan la codificación de la voz y el ancho de banda requerido.</li>
+          <li>Una <strong>PBX (Asterisk con PJSIP)</strong> gestiona extensiones internas, dialplan, IVR, colas y se conecta con la red pública (PSTN) mediante un <strong>SIP Trunk</strong>.</li>
+          <li>La calidad en tiempo real depende de la <strong>latencia, el jitter y la pérdida de paquetes</strong>, y el paso a través de routers requiere comprender <strong>NAT, SDP, STUN, TURN, ICE y SBC</strong>.</li>
+          <li><strong>WebRTC</strong> habilita voz segura en navegadores y apps modernas, pudiendo conectarse con telefonía SIP mediante pasarelas o plataformas como <strong>LiveKit</strong>.</li>
+          <li>En <strong>Agentes de Voz con IA</strong>, <strong>MCP</strong> invoca herramientas (como <code>start_call</code>) y <strong>FCM</strong> envía notificaciones push, pero el audio bidireccional siempre requiere un canal de medios en tiempo real (RTP o WebRTC).</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>GLOSARIO ESENCIAL</h2>
+        <ul>
+          <li><strong>A-law:</strong> variante de codificación PCM utilizada en telefonía, habitual en Europa.</li>
+          <li><strong>AOR:</strong> Address of Record; identifica la dirección lógica/localización SIP.</li>
+          <li><strong>API:</strong> interfaz para que programas intercambien operaciones y datos.</li>
+          <li><strong>DTMF:</strong> tonos de teclado telefónico, como los que se pulsan en un menú IVR.</li>
+          <li><strong>E.164:</strong> recomendación de numeración internacional.</li>
+          <li><strong>Endpoint:</strong> objeto de configuración de un terminal o conexión SIP.</li>
+          <li><strong>FCM:</strong> Firebase Cloud Messaging, servicio de mensajería push.</li>
+          <li><strong>ICE:</strong> Interactive Connectivity Establishment.</li>
+          <li><strong>IVR:</strong> respuesta de voz interactiva, menú telefónico.</li>
+          <li><strong>Jitter:</strong> variación temporal de llegada de paquetes.</li>
+          <li><strong>MCP:</strong> Model Context Protocol.</li>
+          <li><strong>PBX:</strong> Private Branch Exchange, centralita privada.</li>
+          <li><strong>PJSIP:</strong> biblioteca y pila SIP utilizada por Asterisk.</li>
+          <li><strong>PSTN:</strong> red telefónica pública conmutada.</li>
+          <li><strong>RTP:</strong> Real-time Transport Protocol.</li>
+          <li><strong>RTCP:</strong> RTP Control Protocol.</li>
+          <li><strong>SDP:</strong> Session Description Protocol.</li>
+          <li><strong>SIP:</strong> Session Initiation Protocol.</li>
+          <li><strong>SBC:</strong> Session Border Controller.</li>
+          <li><strong>SRTP:</strong> Secure Real-time Transport Protocol.</li>
+          <li><strong>STUN:</strong> Session Traversal Utilities for NAT.</li>
+          <li><strong>TTS:</strong> Text-to-Speech, síntesis de voz.</li>
+          <li><strong>TURN:</strong> Traversal Using Relays around NAT.</li>
+          <li><strong>UDP:</strong> User Datagram Protocol.</li>
+          <li><strong>VoIP:</strong> Voice over Internet Protocol.</li>
+          <li><strong>WebRTC:</strong> tecnologías y API para comunicaciones en tiempo real.</li>
+          <li><strong>WSS:</strong> WebSocket Secure.</li>
+        </ul>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="7">⬅ Anterior: ERRORES Y SEGURIDAD</button>
+        <button class="nav-step-btn next" data-goto="9">Siguiente: FUENTES ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 9: FUENTES (33 enlaces oficiales con botón Abrir en nueva ventana y Copiar URL)
+         ========================================== -->
+    <section class="tab-section" id="sec-9" data-t="FUENTES">
+      <div class="card">
+        <h2>FUENTES Y DOCUMENTACIÓN</h2>
+        <p>Se han priorizado normas técnicas, documentación oficial de proyectos y documentación de proveedores. Las páginas de documentación pueden actualizarse; consulta la versión correspondiente al software que estés instalando.</p>
+
+        <h3>Normas y protocolos</h3>
+
+        <div class="url-card">
+          <strong>1. IETF — RFC 3261: SIP: Session Initiation Protocol</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc3261</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc3261">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc3261">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>2. IETF — RFC 3550: RTP: A Transport Protocol for Real-Time Applications</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc3550</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc3550">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc3550">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>3. IETF — RFC 3711: The Secure Real-time Transport Protocol (SRTP)</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc3711</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc3711">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc3711">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>4. IETF — RFC 8866: SDP: Session Description Protocol</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc8866</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc8866">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc8866">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>5. IETF — RFC 8445: Interactive Connectivity Establishment (ICE)</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc8445</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc8445">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc8445">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>6. IETF — RFC 8489: Session Traversal Utilities for NAT (STUN)</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc8489</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc8489">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc8489">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>7. IETF — RFC 8656: Traversal Using Relays around NAT (TURN)</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc8656</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc8656">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc8656">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>8. IETF — RFC 8825: Overview: Real-Time Protocols for Browser-Based Applications</strong>
+          <span class="url-code">https://www.rfc-editor.org/rfc/rfc8825</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.rfc-editor.org/rfc/rfc8825">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.rfc-editor.org/rfc/rfc8825">COPIAR URL</button>
+          </div>
+        </div>
+
+        <h3>Asterisk y telefonía IP</h3>
+
+        <div class="url-card">
+          <strong>9. Asterisk — Documentación oficial</strong>
+          <span class="url-code">https://docs.asterisk.org/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.asterisk.org/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.asterisk.org/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>10. Asterisk — Get Started</strong>
+          <span class="url-code">https://www.asterisk.org/get-started/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.asterisk.org/get-started/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.asterisk.org/get-started/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>11. Asterisk — PJSIP Configuration</strong>
+          <span class="url-code">https://docs.asterisk.org/Configuration/Channel-Drivers/SIP/Configuring-res_pjsip/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.asterisk.org/Configuration/Channel-Drivers/SIP/Configuring-res_pjsip/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.asterisk.org/Configuration/Channel-Drivers/SIP/Configuring-res_pjsip/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>12. Asterisk — Configuring Asterisk for WebRTC Clients</strong>
+          <span class="url-code">https://docs.asterisk.org/Configuration/WebRTC/Configuring-Asterisk-for-WebRTC-Clients/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.asterisk.org/Configuration/WebRTC/Configuring-Asterisk-for-WebRTC-Clients/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.asterisk.org/Configuration/WebRTC/Configuring-Asterisk-for-WebRTC-Clients/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>13. Asterisk — The Asterisk Documentation Project / Asterisk: The Definitive Guide</strong>
+          <span class="url-code">https://docs.asterisk.org/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.asterisk.org/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.asterisk.org/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <h3>WebRTC y conectividad</h3>
+
+        <div class="url-card">
+          <strong>14. W3C — WebRTC 1.0: Real-Time Communication Between Browsers</strong>
+          <span class="url-code">https://www.w3.org/TR/webrtc/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.w3.org/TR/webrtc/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.w3.org/TR/webrtc/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>15. WebRTC — documentación para desarrolladores</strong>
+          <span class="url-code">https://webrtc.org/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://webrtc.org/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://webrtc.org/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>16. MDN — WebRTC API</strong>
+          <span class="url-code">https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>17. MDN — Protocolos WebRTC</strong>
+          <span class="url-code">https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API/Protocols">COPIAR URL</button>
+          </div>
+        </div>
+
+        <h3>Plataformas de tiempo real, telefonía e IA</h3>
+
+        <div class="url-card">
+          <strong>18. LiveKit — Introducción a telefonía</strong>
+          <span class="url-code">https://docs.livekit.io/telephony/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.livekit.io/telephony/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.livekit.io/telephony/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>19. LiveKit — SIP Primer</strong>
+          <span class="url-code">https://docs.livekit.io/reference/telephony/sip-primer/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.livekit.io/reference/telephony/sip-primer/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.livekit.io/reference/telephony/sip-primer/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>20. LiveKit — Configuración de SIP Trunk</strong>
+          <span class="url-code">https://docs.livekit.io/telephony/start/sip-trunk-setup/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.livekit.io/telephony/start/sip-trunk-setup/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.livekit.io/telephony/start/sip-trunk-setup/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>21. LiveKit — Conectores de telefonía</strong>
+          <span class="url-code">https://docs.livekit.io/telephony/connectors/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.livekit.io/telephony/connectors/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.livekit.io/telephony/connectors/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>22. LiveKit — Introducción a LiveKit</strong>
+          <span class="url-code">https://docs.livekit.io/intro/about/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://docs.livekit.io/intro/about/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://docs.livekit.io/intro/about/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>23. Twilio — SIP Overview</strong>
+          <span class="url-code">https://www.twilio.com/docs/voice/sip</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.twilio.com/docs/voice/sip">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.twilio.com/docs/voice/sip">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>24. Twilio — SIP Quickstart</strong>
+          <span class="url-code">https://www.twilio.com/docs/voice/sip/quickstart</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.twilio.com/docs/voice/sip/quickstart">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.twilio.com/docs/voice/sip/quickstart">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>25. Twilio — SIP Security Best Practices</strong>
+          <span class="url-code">https://www.twilio.com/docs/voice/api/sip-security</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.twilio.com/docs/voice/api/sip-security">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.twilio.com/docs/voice/api/sip-security">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>26. Google — Firebase Cloud Messaging</strong>
+          <span class="url-code">https://firebase.google.com/docs/cloud-messaging</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://firebase.google.com/docs/cloud-messaging">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://firebase.google.com/docs/cloud-messaging">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>27. Model Context Protocol — Documentación oficial</strong>
+          <span class="url-code">https://modelcontextprotocol.io/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://modelcontextprotocol.io/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://modelcontextprotocol.io/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <h3>Aplicaciones cliente</h3>
+
+        <div class="url-card">
+          <strong>28. Linphone — sitio oficial y documentación</strong>
+          <span class="url-code">https://www.linphone.org/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.linphone.org/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.linphone.org/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>29. MicroSIP — sitio oficial</strong>
+          <span class="url-code">https://www.microsip.org/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.microsip.org/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.microsip.org/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>30. Wireshark — documentación oficial</strong>
+          <span class="url-code">https://www.wireshark.org/docs/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.wireshark.org/docs/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.wireshark.org/docs/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <h3>Telefonía móvil y normativa</h3>
+
+        <div class="url-card">
+          <strong>31. GSMA — VoLTE (Voice over LTE)</strong>
+          <span class="url-code">https://www.gsma.com/solutions-and-impact/technologies/networks/ip_services/volte/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.gsma.com/solutions-and-impact/technologies/networks/ip_services/volte/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.gsma.com/solutions-and-impact/technologies/networks/ip_services/volte/">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>32. BOE — Ley 11/2022, de 28 de junio, General de Telecomunicaciones (texto consolidado)</strong>
+          <span class="url-code">https://www.boe.es/eli/es/l/2022/06/28/11/con</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.boe.es/eli/es/l/2022/06/28/11/con">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.boe.es/eli/es/l/2022/06/28/11/con">COPIAR URL</button>
+          </div>
+        </div>
+
+        <div class="url-card">
+          <strong>33. Agencia Española de Protección de Datos (AEPD)</strong>
+          <span class="url-code">https://www.aepd.es/</span>
+          <div class="url-actions">
+            <button class="open-url-btn" type="button" data-url="https://www.aepd.es/">↗ Abrir enlace en nueva ventana</button>
+            <button class="copy-btn" type="button" data-copy-text="https://www.aepd.es/">COPIAR URL</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="8">⬅ Anterior: RESUMEN Y GLOSARIO</button>
+        <button class="nav-step-btn next" data-goto="10">Siguiente: CRÉDITOS ➔</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PESTAÑA 10: CRÉDITOS (Orden obligatorio)
+         ========================================== -->
+    <section class="tab-section" id="sec-10" data-t="CRÉDITOS">
+      <div class="card">
+        <!-- 1. Título de la sección -->
+        <h2>CRÉDITOS</h2>
+
+        <!-- 2. SVG animado compartido con INICIO -->
+        <div id="svg-mount-credits" class="svg-hero-box" role="region" aria-label="Animación interactiva de arquitectura VoIP en CRÉDITOS"></div>
+
+        <!-- 3. Breve descripción de la ilustración -->
+        <p style="text-align:center; color: var(--text-secondary); font-size:0.9rem;">
+          Ilustración vectorial animada multicapa que representa el ecosistema completo de telefonía IP: un núcleo central Asterisk PBX (PJSIP) interconectado con terminales SIP, agentes de voz con IA mediante WebRTC/MCP, pasarelas hacia la red pública PSTN (SIP Trunk E.164), anillos de protección NAT/TLS/SRTP y análisis acústico RTP/RTCP en tiempo real.
+        </p>
+
+        <!-- 4. Nombre del autor (elemento visual más destacado) -->
+        <div class="author-spotlight">Rubén Sbarsky</div>
+
+        <!-- 5. Texto «Autor del tutorial» -->
+        <div class="author-role">Autor del tutorial</div>
+
+        <!-- 6. Información adicional pertinente + Fecha y hora fijas sincronizadas -->
+        <div class="callout" style="text-align:center;">
+          <p><strong>Fecha y hora de sincronización y creación:</strong> <code>15/11/2026 — 11:40:14</code></p>
+          <p><strong>Referencia documental del material original:</strong> Rubén Sbarsky. Fecha 📆:15/11/2026. Hora 🕰: 11:36:23</p>
+          <p>Material didáctico de formación autodidacta. Elaborado para aprender VoIP mediante conceptos, prácticas progresivas, documentación técnica y proyectos aplicados.</p>
+          <p><strong>Nota de rigor:</strong> las configuraciones y comandos incluidos son material de laboratorio y deben contrastarse con la versión concreta de cada software. Ningún ejemplo parcial debe copiarse directamente a producción. Las tecnologías, servicios y condiciones comerciales pueden cambiar; consulta siempre la documentación oficial enlazada.</p>
+        </div>
+
+        <!-- 7. Número de versión -->
+        <p style="text-align:center; font-weight:800; color: var(--accent-bright); margin-top: 12px;">
+          Versión del entregable: V001 (tutorial_voip_desde_cero_V001.html)
+        </p>
+      </div>
+
+      <div class="tab-footer-nav">
+        <button class="nav-step-btn" data-goto="9">⬅ Anterior: FUENTES</button>
+        <button class="nav-step-btn next" data-goto="0">Volver a INICIO 🏠</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast de confirmación visual -->
+  <div id="toast-msg" role="status" aria-live="polite">Acción completada</div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const STORAGE_PREFIX = 'voip_ruben_v001_';
+      const secs = Array.from(document.querySelectorAll('.tab-section'));
+      const navChips = Array.from(document.querySelectorAll('#top-nav .chip[data-tab]'));
+      const dr = document.querySelector('#dr');
+      const mb = document.querySelector('#mb');
+      const ixBtn = document.querySelector('#ix');
+      const toastEl = document.querySelector('#toast-msg');
+
+      let currentTabIndex = 0;
+      let svgTemplateString = '';
+      let isSvgPaused = false;
+
+      /* =====================================================
+         1. GESTIÓN DE ALMACENAMIENTO SEGURO (Clean Code)
+         ===================================================== */
+      function saveSetting(key, value) {
+        try {
+          window.localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(value));
+        } catch (err) {
+          /* Navegador con localStorage restringido: continúa sin bloquear */
+        }
+      }
+
+      function loadSetting(key, fallbackValue) {
+        try {
+          const raw = window.localStorage.getItem(STORAGE_PREFIX + key);
+          return raw !== null ? JSON.parse(raw) : fallbackValue;
+        } catch (err) {
+          return fallbackValue;
+        }
+      }
+
+      function showToast(message) {
+        if (!toastEl) return;
+        toastEl.textContent = message;
+        toastEl.classList.add('visible');
+        window.clearTimeout(toastEl._timer);
+        toastEl._timer = window.setTimeout(function () {
+          toastEl.classList.remove('visible');
+        }, 2300);
+      }
+
+      /* =====================================================
+         2. PLANTILLA ÚNICA SVG HERO Y MONTAJE CON IDs ÚNICOS
+         ===================================================== */
+      function extractMasterSvgTemplate() {
+        const masterNode = document.getElementById('svg-master-template');
+        if (!masterNode) return;
+        svgTemplateString = masterNode.innerHTML.trim();
+        masterNode.remove();
+      }
+
+      function buildUniqueSvgMarkup(instanceSuffix) {
+        if (!svgTemplateString) return '';
+        return svgTemplateString.replace(/__UID__/g, instanceSuffix);
+      }
+
+      function applySvgDataUriFallback(container, instanceSuffix) {
+        const rawSvg = buildUniqueSvgMarkup(instanceSuffix);
+        if (!rawSvg) return;
+        const encoded = 'data:image/svg+xml;utf8,' + encodeURIComponent(rawSvg);
+        container.innerHTML = '<img src="' + encoded + '" alt="Ilustración de arquitectura VoIP" style="width:100%;height:100%;object-fit:contain;" />';
+      }
+
+      function mountSvgInstance(containerId, instanceSuffix) {
+        const container = document.getElementById(containerId);
+        if (!container || !svgTemplateString) return;
+        try {
+          container.innerHTML = buildUniqueSvgMarkup(instanceSuffix);
+          container.classList.toggle('svg-paused', isSvgPaused);
+          const svgEl = container.querySelector('svg');
+          if (!svgEl) {
+            applySvgDataUriFallback(container, instanceSuffix);
+          }
+        } catch (err) {
+          applySvgDataUriFallback(container, instanceSuffix);
+        }
+      }
+
+      function ensureVisibleSvgsMounted() {
+        if (currentTabIndex === 0) {
+          const homeBox = document.getElementById('svg-mount-home');
+          if (homeBox && !homeBox.querySelector('svg') && !homeBox.querySelector('img')) {
+            mountSvgInstance('svg-mount-home', 'home');
+          }
+        }
+        if (currentTabIndex === 10) {
+          const creditsBox = document.getElementById('svg-mount-credits');
+          if (creditsBox && !creditsBox.querySelector('svg') && !creditsBox.querySelector('img')) {
+            mountSvgInstance('svg-mount-credits', 'credits');
+          }
+        }
+      }
+
+      /* =====================================================
+         3. NAVEGACIÓN SPA E ÍNDICE LATERAL (#dr y #mb)
+         ===================================================== */
+      function toggleDrawer(forceState) {
+        const shouldOpen = typeof forceState === 'boolean' ? forceState : !dr.classList.contains('o');
+        dr.classList.toggle('o', shouldOpen);
+        mb.setAttribute('aria-expanded', String(dr.classList.contains('o')));
+      }
+
+      function go(index) {
+        const targetIndex = Math.max(0, Math.min(secs.length - 1, Number(index) || 0));
+        currentTabIndex = targetIndex;
+
+        secs.forEach(function (sec, idx) {
+          sec.classList.toggle('active', idx === targetIndex);
+        });
+
+        navChips.forEach(function (chip) {
+          const chipIdx = Number(chip.getAttribute('data-tab'));
+          const isCurrent = chipIdx === targetIndex;
+          chip.classList.toggle('active', isCurrent);
+          if (isCurrent) {
+            chip.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+          }
+        });
+
+        Array.from(dr.children).forEach(function (linkEl, j) {
+          linkEl.classList.toggle('on', j === targetIndex);
+        });
+
+        if (targetIndex === 0) {
+          mountSvgInstance('svg-mount-home', 'home');
+        } else if (targetIndex === 10) {
+          mountSvgInstance('svg-mount-credits', 'credits');
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        saveSetting('active_tab', targetIndex);
+        updateReadingProgress();
+      }
+
+      function buildDrawerIndex() {
+        secs.forEach(function (s, i) {
+          const a = document.createElement('a');
+          const titleText = s.dataset.t || (s.querySelector('h2') ? s.querySelector('h2').textContent : 'Sección');
+          a.textContent = (i ? i + '. ' : '') + titleText;
+          a.setAttribute('tabindex', '0');
+          a.onclick = function () {
+            go(i);
+            toggleDrawer(false);
+          };
+          a.onkeydown = function (ev) {
+            if (ev.key === 'Enter' || ev.key === ' ') {
+              ev.preventDefault();
+              go(i);
+              toggleDrawer(false);
+            }
+          };
+          dr.appendChild(a);
+        });
+      }
+
+      /* =====================================================
+         4. BOTONES FLOTANTES ARRASTRABLES (INICIO y ARRIBA)
+         ===================================================== */
+      function makeButtonDraggable(buttonEl, onClickAction, storageKey) {
+        if (!buttonEl) return;
+        let isDragging = false;
+        let hasMoved = false;
+        let startX = 0;
+        let startY = 0;
+        let initialLeft = 0;
+        let initialTop = 0;
+
+        const savedPos = loadSetting(storageKey, null);
+        if (savedPos && typeof savedPos.left === 'number' && typeof savedPos.top === 'number') {
+          buttonEl.style.left = Math.min(window.innerWidth - 92, Math.max(4, savedPos.left)) + 'px';
+          buttonEl.style.top = Math.min(window.innerHeight - 54, Math.max(64, savedPos.top)) + 'px';
+          buttonEl.style.right = 'auto';
+          buttonEl.style.bottom = 'auto';
+        }
+
+        buttonEl.addEventListener('pointerdown', function (e) {
+          isDragging = true;
+          hasMoved = false;
+          startX = e.clientX;
+          startY = e.clientY;
+          const rect = buttonEl.getBoundingClientRect();
+          initialLeft = rect.left;
+          initialTop = rect.top;
+          buttonEl.setPointerCapture(e.pointerId);
+        });
+
+        buttonEl.addEventListener('pointermove', function (e) {
+          if (!isDragging) return;
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+          if (Math.abs(dx) > 6 || Math.abs(dy) > 6) {
+            hasMoved = true;
+          }
+          if (hasMoved) {
+            const maxLeft = window.innerWidth - buttonEl.offsetWidth - 4;
+            const maxTop = window.innerHeight - buttonEl.offsetHeight - 4;
+            const newLeft = Math.min(maxLeft, Math.max(4, initialLeft + dx));
+            const newTop = Math.min(maxTop, Math.max(64, initialTop + dy));
+            buttonEl.style.left = newLeft + 'px';
+            buttonEl.style.top = newTop + 'px';
+            buttonEl.style.right = 'auto';
+            buttonEl.style.bottom = 'auto';
+          }
+        });
+
+        buttonEl.addEventListener('pointerup', function (e) {
+          if (!isDragging) return;
+          isDragging = false;
+          buttonEl.releasePointerCapture(e.pointerId);
+          if (hasMoved) {
+            const rect = buttonEl.getBoundingClientRect();
+            saveSetting(storageKey, { left: rect.left, top: rect.top });
+          } else {
+            onClickAction();
+          }
+        });
+      }
+
+      /* =====================================================
+         5. COPIAR AL PORTAPAPELES Y ENLACES EXTERNOS
+         ===================================================== */
+      function copyTextToClipboard(rawText, triggerBtn) {
+        const cleanText = String(rawText || '');
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(cleanText).then(function () {
+            indicateCopySuccess(triggerBtn);
+          }).catch(function () {
+            fallbackCopyText(cleanText, triggerBtn);
+          });
+        } else {
+          fallbackCopyText(cleanText, triggerBtn);
+        }
+      }
+
+      function fallbackCopyText(text, triggerBtn) {
+        try {
+          const tempArea = document.createElement('textarea');
+          tempArea.value = text;
+          tempArea.style.position = 'fixed';
+          tempArea.style.left = '-9999px';
+          document.body.appendChild(tempArea);
+          tempArea.select();
+          const ok = document.execCommand('copy');
+          document.body.removeChild(tempArea);
+          if (ok) {
+            indicateCopySuccess(triggerBtn);
+          } else {
+            window.prompt('Copia manualmente el texto:', text);
+          }
+        } catch (err) {
+          window.prompt('Copia manualmente el texto:', text);
+        }
+      }
+
+      function indicateCopySuccess(btn) {
+        showToast('✓ Contenido copiado al portapapeles');
+        if (!btn) return;
+        const originalLabel = btn.textContent;
+        btn.textContent = '¡COPIADO!';
+        window.setTimeout(function () {
+          btn.textContent = originalLabel;
+        }, 1600);
+      }
+
+      /* =====================================================
+         6. IMPRESIÓN A4 Y GUARDADO EN PDF
+         ===================================================== */
+      function handlePrintDocument() {
+        const closedDetails = [];
+        document.querySelectorAll('details.qa-item').forEach(function (det) {
+          if (!det.hasAttribute('open')) {
+            closedDetails.push(det);
+            det.setAttribute('open', 'open');
+          }
+        });
+
+        mountSvgInstance('svg-mount-home', 'home');
+        mountSvgInstance('svg-mount-credits', 'credits');
+
+        try {
+          window.print();
+        } catch (err) {
+          window.alert('Abre este archivo directamente en el navegador y utiliza Ctrl+P o Cmd+P');
+        } finally {
+          window.setTimeout(function () {
+            closedDetails.forEach(function (det) {
+              det.removeAttribute('open');
+            });
+          }, 600);
+        }
+      }
+
+      /* =====================================================
+         7. PROGRESO DE LECTURA, CHECKLISTS Y EVALUACIÓN
+         ===================================================== */
+      function updateReadingProgress() {
+        const progressBar = document.getElementById('reading-progress-bar');
+        if (!progressBar) return;
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const pct = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 0;
+        progressBar.style.width = pct + '%';
+      }
+
+      function initChecklistsAndEvaluation() {
+        const savedChecks = loadSetting('checks', {});
+        document.querySelectorAll('input[type="checkbox"][data-check]').forEach(function (box) {
+          const key = box.getAttribute('data-check');
+          if (savedChecks[key]) {
+            box.checked = true;
+          }
+          box.addEventListener('change', function () {
+            savedChecks[key] = box.checked;
+            saveSetting('checks', savedChecks);
+          });
+        });
+
+        const savedEval = loadSetting('eval_scores', {});
+        const evalSelects = Array.from(document.querySelectorAll('.eval-select[data-eval]'));
+
+        function refreshTotalEvalScore() {
+          let sum = 0;
+          evalSelects.forEach(function (sel) {
+            sum += Number(sel.value) || 0;
+          });
+          const summaryEl = document.getElementById('eval-score-summary');
+          if (summaryEl) {
+            summaryEl.innerHTML = 'Puntuación total actual: <strong>' + sum + ' / 36</strong>';
+          }
+        }
+
+        evalSelects.forEach(function (sel) {
+          const key = sel.getAttribute('data-eval');
+          if (savedEval[key] !== undefined) {
+            sel.value = String(savedEval[key]);
+          }
+          sel.addEventListener('change', function () {
+            savedEval[key] = Number(sel.value);
+            saveSetting('eval_scores', savedEval);
+            refreshTotalEvalScore();
+          });
+        });
+
+        refreshTotalEvalScore();
+      }
+
+      /* =====================================================
+         8. BUSCADOR INTERNO ENTRE PESTAÑAS
+         ===================================================== */
+      function setupSearch() {
+        const searchInput = document.getElementById('global-search');
+        if (!searchInput) return;
+
+        searchInput.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') {
+            const term = searchInput.value.trim().toLowerCase();
+            if (!term) return;
+            for (let i = 0; i < secs.length; i++) {
+              if (secs[i].textContent.toLowerCase().includes(term)) {
+                go(i);
+                showToast('Encontrado en: ' + (secs[i].dataset.t || 'Sección'));
+                return;
+              }
+            }
+            showToast('No se encontraron coincidencias para "' + searchInput.value + '"');
+          }
+        });
+      }
+
+      /* =====================================================
+         9. INICIALIZACIÓN PRINCIPAL
+         ===================================================== */
+      function initApp() {
+        extractMasterSvgTemplate();
+        buildDrawerIndex();
+
+        /* Eventos del botón ☰ Índice y cierre por Escape o clic exterior */
+        mb.onclick = function () { toggleDrawer(); };
+        if (ixBtn) {
+          ixBtn.onclick = function () { toggleDrawer(true); };
+        }
+        window.addEventListener('keydown', function (e) {
+          if (e.key === 'Escape') toggleDrawer(false);
+        });
+        document.addEventListener('click', function (e) {
+          if (!e.target.closest('#dr,#mb,#ix')) {
+            toggleDrawer(false);
+          }
+        });
+
+        /* Navegación por chips superiores y botones pie de pestaña */
+        navChips.forEach(function (chip) {
+          chip.addEventListener('click', function () {
+            go(Number(chip.getAttribute('data-tab')));
+          });
+        });
+
+        document.querySelectorAll('[data-goto]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            go(Number(btn.getAttribute('data-goto')));
+          });
+        });
+
+        /* Control de pausa del SVG Hero */
+        const toggleAnimBtn = document.getElementById('toggle-anim-home');
+        if (toggleAnimBtn) {
+          toggleAnimBtn.addEventListener('click', function () {
+            isSvgPaused = !isSvgPaused;
+            document.querySelectorAll('.svg-hero-box').forEach(function (box) {
+              box.classList.toggle('svg-paused', isSvgPaused);
+            });
+            showToast(isSvgPaused ? 'Animación SVG en pausa' : 'Animación SVG en movimiento');
+          });
+        }
+
+        /* Botones COPIAR en bloques de código y tarjetas URL */
+        document.querySelectorAll('.copy-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const explicitText = btn.getAttribute('data-copy-text');
+            if (explicitText) {
+              copyTextToClipboard(explicitText, btn);
+              return;
+            }
+            const wrap = btn.closest('.code-wrap');
+            const codeEl = wrap ? wrap.querySelector('pre code') : null;
+            if (codeEl) {
+              copyTextToClipboard(codeEl.textContent, btn);
+            }
+          });
+        });
+
+        /* Botones obligatorios "Abrir enlace en nueva ventana" */
+        document.querySelectorAll('.open-url-btn').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const url = btn.getAttribute('data-url');
+            if (url) {
+              window.open(url, '_blank', 'noopener,noreferrer');
+            }
+          });
+        });
+
+        /* Desplegar / plegar las 33 preguntas Q&A */
+        const expandAllBtn = document.getElementById('expand-all-qa');
+        const collapseAllBtn = document.getElementById('collapse-all-qa');
+        if (expandAllBtn) {
+          expandAllBtn.addEventListener('click', function () {
+            document.querySelectorAll('#sec-6 details.qa-item').forEach(function (d) { d.setAttribute('open', 'open'); });
+          });
+        }
+        if (collapseAllBtn) {
+          collapseAllBtn.addEventListener('click', function () {
+            document.querySelectorAll('#sec-6 details.qa-item').forEach(function (d) { d.removeAttribute('open'); });
+          });
+        }
+
+        /* Tamaño de fuente y tema claro/oscuro */
+        let fontScale = loadSetting('font_scale', 1);
+        document.documentElement.style.setProperty('--font-scale', String(fontScale));
+
+        document.getElementById('font-dec-btn').addEventListener('click', function () {
+          fontScale = Math.max(0.85, Number((fontScale - 0.08).toFixed(2)));
+          document.documentElement.style.setProperty('--font-scale', String(fontScale));
+          saveSetting('font_scale', fontScale);
+          showToast('Tamaño de letra: ' + Math.round(fontScale * 100) + '%');
+        });
+
+        document.getElementById('font-inc-btn').addEventListener('click', function () {
+          fontScale = Math.min(1.35, Number((fontScale + 0.08).toFixed(2)));
+          document.documentElement.style.setProperty('--font-scale', String(fontScale));
+          saveSetting('font_scale', fontScale);
+          showToast('Tamaño de letra: ' + Math.round(fontScale * 100) + '%');
+        });
+
+        const isLight = loadSetting('light_theme', false);
+        if (isLight) document.body.classList.add('light-theme');
+
+        document.getElementById('theme-toggle-btn').addEventListener('click', function () {
+          const activeLight = document.body.classList.toggle('light-theme');
+          saveSetting('light_theme', activeLight);
+          showToast(activeLight ? 'Modo claro activado' : 'Modo oscuro activado');
+        });
+
+        document.getElementById('print-pdf-btn').addEventListener('click', handlePrintDocument);
+
+        /* Configurar los dos botones flotantes arrastrables */
+        makeButtonDraggable(
+          document.getElementById('float-home-btn'),
+          function () { go(0); showToast('En pestaña INICIO'); },
+          'pos_home_btn'
+        );
+
+        makeButtonDraggable(
+          document.getElementById('float-top-btn'),
+          function () { window.scrollTo({ top: 0, behavior: 'smooth' }); showToast('Inicio de la pestaña actual'); },
+          'pos_top_btn'
+        );
+
+        initChecklistsAndEvaluation();
+        setupSearch();
+        window.addEventListener('scroll', updateReadingProgress, { passive: true });
+
+        /* Cargar pestaña guardada o INICIO y activar vigilancia periódica del SVG */
+        const initialTab = loadSetting('active_tab', 0);
+        go(initialTab);
+        window.setInterval(ensureVisibleSvgsMounted, 2500);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initApp);
+      } else {
+        initApp();
+      }
+    })();
+  </script>
+</body>
+</html>
